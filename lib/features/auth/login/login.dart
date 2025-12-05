@@ -163,6 +163,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       //     ],
                       //   ),
                       // ),
+
+
+                      //richtext
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
