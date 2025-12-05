@@ -1,4 +1,5 @@
 
+import 'package:agrix/features/onboarding/Splash_screen1.dart';
 import 'package:flutter/material.dart';
 
 void main() {
