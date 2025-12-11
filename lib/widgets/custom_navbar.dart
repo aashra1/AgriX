@@ -76,19 +76,19 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
             ],
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/icons/profile.png', width: 24, height: 24),
-              Text(
-                "Profile",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     Image.asset('assets/icons/profile.png', width: 24, height: 24),
+          //     Text(
+          //       "Profile",
+          //       style: GoogleFonts.crimsonPro(
+          //         fontSize: 12,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
