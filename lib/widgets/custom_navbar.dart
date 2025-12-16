@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CustomBottomNavBar extends StatelessWidget {
+class CustomBottomNavBar extends StatefulWidget {
   const CustomBottomNavBar({super.key});
 
+  @override
+  State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
+}
+
+class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,12 +26,12 @@ class CustomBottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Selected Item (Home)
+        
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF0B3D0B), // Dark Green
-              borderRadius: BorderRadius.circular(12), // rounded edges 12
+              color: const Color(0xFF0B3D0B), 
+              borderRadius: BorderRadius.circular(12), 
             ),
             child: Row(
               children: [
@@ -76,19 +81,19 @@ class CustomBottomNavBar extends StatelessWidget {
               ),
             ],
           ),
-          // Column(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     Image.asset('assets/icons/profile.png', width: 24, height: 24),
-          //     Text(
-          //       "Profile",
-          //       style: GoogleFonts.crimsonPro(
-          //         fontSize: 12,
-          //         fontWeight: FontWeight.w500,
-          //       ),
-          //     ),
-          //   ],
-          // ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('assets/icons/profile.png', width: 24, height: 24),
+              Text(
+                "Profile",
+                style: GoogleFonts.crimsonPro(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
