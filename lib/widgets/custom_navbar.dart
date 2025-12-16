@@ -22,8 +22,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
     final List<Map<String, String>> navItems = [
       {'icon': 'assets/icons/home.png', 'label': 'Home'},
       {'icon': 'assets/icons/favorite.png', 'label': 'Favorites'},
-      {'icon': 'assets/icons/cart.png', 'label': 'Cart'},
-      {'icon': 'assets/icons/profile.png', 'label': 'Profile'},
+      {'icon': 'assets/icons/shopping-cart-2.png', 'label': 'Cart'},
+      {'icon': 'assets/icons/user.png', 'label': 'Profile'},
     ];
 
     return Container(
@@ -40,14 +40,17 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(navItems.length, (index){
+        children: List.generate(navItems.length, (index) {
           bool isSelected = _selectedIndex == index;
 
           if (isSelected) {
             return GestureDetector(
               onTap: () => _onItemTapped(index),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0B3D0B),
                   borderRadius: BorderRadius.circular(12),
@@ -79,11 +82,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    navItems[index]['icon']!,
-                    width: 24,
-                    height: 24,
-                  ),
+                  Image.asset(navItems[index]['icon']!, width: 24, height: 24),
                   const SizedBox(height: 4),
                   Text(
                     navItems[index]['label']!,
