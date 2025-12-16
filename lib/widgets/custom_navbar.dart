@@ -19,6 +19,13 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, String>> navItems = [
+      {'icon': 'assets/icons/home.png', 'label': 'Home'},
+      {'icon': 'assets/icons/favorite.png', 'label': 'Favorites'},
+      {'icon': 'assets/icons/cart.png', 'label': 'Cart'},
+      {'icon': 'assets/icons/profile.png', 'label': 'Profile'},
+    ];
+    
     return Container(
       height: 80,
       decoration: BoxDecoration(
