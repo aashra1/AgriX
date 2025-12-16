@@ -25,7 +25,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       {'icon': 'assets/icons/cart.png', 'label': 'Cart'},
       {'icon': 'assets/icons/profile.png', 'label': 'Profile'},
     ];
-    
+
     return Container(
       height: 80,
       decoration: BoxDecoration(
@@ -40,76 +40,64 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-        
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B3D0B), 
-              borderRadius: BorderRadius.circular(12), 
-            ),
-            child: Row(
-              children: [
-                Image.asset(
-                  'assets/icons/home.png',
-                  width: 24,
-                  height: 24,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Home",
-                  style: GoogleFonts.crimsonPro(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        children: List.generate(navItems.length, (index){
+          bool isSelected = _selectedIndex == index;
 
-          // Unselected Items
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/icons/favorite.png', width: 24, height: 24),
-              Text(
-                "Favorites",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+          if (isSelected) {
+            return GestureDetector(
+              onTap: () => _onItemTapped(index),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0B3D0B),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      navItems[index]['icon']!,
+                      width: 24,
+                      height: 24,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      navItems[index]['label']!,
+                      style: GoogleFonts.crimsonPro(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/icons/cart.png', width: 24, height: 24),
-              Text(
-                "Cart",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+            );
+          } else {
+            return GestureDetector(
+              onTap: () => _onItemTapped(index),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    navItems[index]['icon']!,
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    navItems[index]['label']!,
+                    style: GoogleFonts.crimsonPro(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/icons/profile.png', width: 24, height: 24),
-              Text(
-                "Profile",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ],
+            );
+          }
+        }),
       ),
     );
   }
