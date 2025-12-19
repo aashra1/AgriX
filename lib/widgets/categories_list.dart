@@ -15,53 +15,67 @@ class CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+
+    int crossAxisCount = 2;
+    if (w >= 900) {
+      crossAxisCount = 4;
+    } else if (w >= 600) {
+      crossAxisCount = 3; 
+    }
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.05),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: categories.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 2.5,
-          crossAxisSpacing: 15,
-          mainAxisSpacing: 15,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 2.8,
+          crossAxisSpacing: w * 0.04,
+          mainAxisSpacing: w * 0.04,
         ),
         itemBuilder: (context, index) {
           final category = categories[index];
+
           return Container(
+            padding: EdgeInsets.all(w * 0.03),
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Image.asset(
                   category['icon'],
-                  width: 30,
-                  height: 30,
-                  color: Color(0xFFEBB61B),
+                  width: w * 0.07,
+                  height: w * 0.07,
+                  color: const Color(0xFFEBB61B),
                 ),
-                const SizedBox(width: 10),
+
+                SizedBox(width: w * 0.03),
+
                 Expanded(
                   child: Text(
                     category['name'],
                     style: GoogleFonts.crimsonPro(
-                      fontSize: 14,
+                      fontSize: w * 0.038,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: Image.asset(
-                    'assets/icons/to-right.png',
-                    fit: BoxFit.contain,
-                  ),
+
+                SizedBox(width: w * 0.02),
+                
+                Image.asset(
+                  'assets/icons/to-right.png',
+                  width: w * 0.035,
+                  height: w * 0.035,
+                  fit: BoxFit.contain,
                 ),
               ],
             ),

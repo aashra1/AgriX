@@ -10,36 +10,51 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+    final h = size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// HEADER (already its own widget)
             const HeaderSection(),
-            const SizedBox(height: 20),
+
+            SizedBox(height: h * 0.025),
+
+            /// CATEGORIES TITLE
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: w * 0.05),
               child: Text(
                 "Categories",
                 style: GoogleFonts.crimsonPro(
-                  fontSize: 20,
+                  fontSize: w * 0.05,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey[900],
                 ),
               ),
             ),
+
+            SizedBox(height: h * 0.015),
+
+            /// CATEGORIES GRID
             const CategoriesGrid(),
-            const SizedBox(height: 20),
+
+            SizedBox(height: h * 0.03),
+
+            /// OFFERS HEADER
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: w * 0.05),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "Exciting Offers",
                     style: GoogleFonts.crimsonPro(
-                      fontSize: 20,
+                      fontSize: w * 0.05,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey[900],
                     ),
@@ -47,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     "view all",
                     style: GoogleFonts.crimsonPro(
-                      fontSize: 16,
+                      fontSize: w * 0.04,
                       color: Colors.green[800],
                       fontWeight: FontWeight.w400,
                     ),
@@ -55,10 +70,13 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 15),
+
+            SizedBox(height: h * 0.02),
+
+            /// OFFERS LIST
             const OffersList(),
 
-            const SizedBox(height: 30),
+            SizedBox(height: h * 0.04),
           ],
         ),
       ),
@@ -66,5 +84,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-

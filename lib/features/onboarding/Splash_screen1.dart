@@ -14,6 +14,8 @@ class _SplashScreen1State extends State<SplashScreen1> {
     super.initState();
 
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return; 
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SplashScreen2()),
@@ -23,14 +25,19 @@ class _SplashScreen1State extends State<SplashScreen1> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5FFED),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.8,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: w * 0.6, // 👈 better for tablets
+            ),
+            child: Image.asset("assets/images/logo.png", fit: BoxFit.contain),
           ),
-          child: Image.asset("assets/images/logo.png", fit: BoxFit.contain),
         ),
       ),
     );

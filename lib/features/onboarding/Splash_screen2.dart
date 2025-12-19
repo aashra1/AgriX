@@ -12,55 +12,79 @@ class SplashScreen2 extends StatefulWidget {
 class _SplashScreen2State extends State<SplashScreen2> {
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+    final h = size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5FFED),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 400,
-              child: Image.asset("assets/images/splash2.png"),
-            ),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                "Empowering Farmers with Smart Agriculture Solutions",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-            ),
-            const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SplashScreen3(),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                /// IMAGE
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: w * 0.8, // responsive image width
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B3D0B),
-                minimumSize: const Size(230, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    "assets/images/splash2.png",
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              child: Text(
-                "Continue",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 25,
-                  color: Colors.white,
+
+                SizedBox(height: h * 0.04),
+
+                /// TEXT
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: w * 0.1),
+                  child: Text(
+                    "Empowering Farmers with Smart Agriculture Solutions",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.crimsonPro(
+                      fontSize: w * 0.055,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
                 ),
-              ),
+
+                SizedBox(height: h * 0.06),
+
+                /// BUTTON
+                SizedBox(
+                  width: w * 0.6,
+                  height: h * 0.065,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SplashScreen3(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0B3D0B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Continue",
+                      style: GoogleFonts.crimsonPro(
+                        fontSize: w * 0.055,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -12,62 +12,94 @@ class SplashScreen3 extends StatefulWidget {
 class _SplashScreen3State extends State<SplashScreen3> {
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+    final h = size.height;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5FFED),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 120,
-              child: Image.asset("assets/images/logo-2.png"),
-            ),
-            const SizedBox(height: 30),
-            Text(
-              "Grow Smarter, Harvest Better",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.crimsonPro(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                "Join thousands of farmers using Agrix to boost productivity.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 20,
-                  color: Colors.black87,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                /// LOGO
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: w * 0.3, // responsive logo width
+                  ),
+                  child: Image.asset(
+                    "assets/images/logo-2.png",
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0B3D0B),
-                minimumSize: const Size(230, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+
+                SizedBox(height: h * 0.04),
+
+                /// TITLE
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: w * 0.08),
+                  child: Text(
+                    "Grow Smarter, Harvest Better",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.crimsonPro(
+                      fontSize: w * 0.06,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                "Continue",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 25,
-                  color: Colors.white,
+
+                SizedBox(height: h * 0.02),
+
+                /// SUBTITLE
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: w * 0.08),
+                  child: Text(
+                    "Join thousands of farmers using Agrix to boost productivity.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.crimsonPro(
+                      fontSize: w * 0.045,
+                      color: Colors.black87,
+                    ),
+                  ),
                 ),
-              ),
+
+                SizedBox(height: h * 0.06),
+
+                /// BUTTON
+                SizedBox(
+                  width: w * 0.6,
+                  height: h * 0.065,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0B3D0B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Continue",
+                      style: GoogleFonts.crimsonPro(
+                        fontSize: w * 0.05,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
