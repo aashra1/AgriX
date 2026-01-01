@@ -279,6 +279,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         labelText: label,
         labelStyle: GoogleFonts.crimsonPro(
           fontSize: w * 0.045,
+          fontWeight: FontWeight.w400,
           color: const Color(0xFF777777),
         ),
         prefixIcon: Padding(

@@ -131,6 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Email',
                       labelStyle: GoogleFonts.crimsonPro(
                         fontSize: w * 0.05,
+                        fontWeight: FontWeight.w400,
                         color: const Color(0xFF777777),
                       ),
                       prefixIcon: Padding(
@@ -170,6 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       labelText: 'Password',
                       labelStyle: GoogleFonts.crimsonPro(
                         fontSize: w * 0.055,
+                        fontWeight: FontWeight.w400,
                         color: const Color(0xFF777777),
                       ),
                       prefixIcon: Padding(
