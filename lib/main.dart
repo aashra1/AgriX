@@ -1,5 +1,5 @@
 import 'package:agrix/core/theme/theme.dart';
-import 'package:agrix/features/onboarding/Splash_screen1.dart';
+import 'package:agrix/screens/onboarding/Splash_screen1.dart';
 import 'package:flutter/material.dart';
 
 void main() {

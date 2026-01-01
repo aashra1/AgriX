@@ -15,67 +15,65 @@ class CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
+    // Screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    int crossAxisCount = 2;
-    if (w >= 900) {
-      crossAxisCount = 4;
-    } else if (w >= 600) {
-      crossAxisCount = 3; 
-    }
+    // Responsive sizing
+    final double gridPadding = screenWidth * 0.05; // 5% of screen width
+    final double iconSize = screenWidth * 0.08; // 8% of screen width
+    final double spacing = screenWidth * 0.03; // 3% of screen width
+    final double fontSize = screenWidth * 0.035; // scalable font
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.05),
+      padding: EdgeInsets.symmetric(horizontal: gridPadding),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: categories.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 2.8,
-          crossAxisSpacing: w * 0.04,
-          mainAxisSpacing: w * 0.04,
+          crossAxisCount:
+              screenWidth < 600 ? 2 : 3, // 2 columns on small, 3 on bigger
+          childAspectRatio:
+              screenWidth / screenHeight * 2.2, // responsive aspect
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
         ),
         itemBuilder: (context, index) {
           final category = categories[index];
-
           return Container(
-            padding: EdgeInsets.all(w * 0.03),
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
             ),
+            padding: EdgeInsets.all(spacing),
             child: Row(
               children: [
                 Image.asset(
                   category['icon'],
-                  width: w * 0.07,
-                  height: w * 0.07,
+                  width: iconSize,
+                  height: iconSize,
                   color: const Color(0xFFEBB61B),
                 ),
-
-                SizedBox(width: w * 0.03),
-
+                SizedBox(width: spacing),
                 Expanded(
                   child: Text(
                     category['name'],
                     style: GoogleFonts.crimsonPro(
-                      fontSize: w * 0.038,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
-                SizedBox(width: w * 0.02),
-                
-                Image.asset(
-                  'assets/icons/to-right.png',
-                  width: w * 0.035,
-                  height: w * 0.035,
-                  fit: BoxFit.contain,
+                SizedBox(
+                  width: iconSize * 0.5,
+                  height: iconSize * 0.5,
+                  child: Image.asset(
+                    'assets/icons/to-right.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ],
             ),
@@ -85,3 +83,5 @@ class CategoriesGrid extends StatelessWidget {
     );
   }
 }
+
+

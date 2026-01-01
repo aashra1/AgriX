@@ -1,4 +1,4 @@
-import 'package:agrix/features/onboarding/Splash_screen2.dart';
+import 'package:agrix/screens/onboarding/Splash_screen2.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen1 extends StatefulWidget {

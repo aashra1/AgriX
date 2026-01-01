@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomBottomNavBar extends StatefulWidget {
-  const CustomBottomNavBar({super.key});
+  final List<Widget> pages;
+
+  const CustomBottomNavBar({super.key, required this.pages});
 
   @override
   State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
@@ -12,15 +14,22 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    // Responsive sizes
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final double navHeight = screenHeight * 0.1;
+    final double iconSize = screenWidth * 0.06;
+    final double fontSizeSelected = screenWidth * 0.035;
+    final double fontSizeUnselected = screenWidth * 0.03;
+    final double paddingSelected = screenWidth * 0.04;
 
     final List<Map<String, String>> navItems = [
       {'icon': 'assets/icons/home.png', 'label': 'Home'},
@@ -29,89 +38,84 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       {'icon': 'assets/icons/user.png', 'label': 'Profile'},
     ];
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        w * 0.04,
-        0,
-        w * 0.04,
-        bottomPadding > 0 ? bottomPadding : h * 0.02,
-      ),
-      child: Container(
-        height: h * 0.09,
+    return Scaffold(
+      body: widget.pages[_selectedIndex],
+      bottomNavigationBar: Container(
+        height: navHeight,
+        margin: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.1),
-              blurRadius: 12,
-              offset: const Offset(0, -4),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(navItems.length, (index) {
-            final isSelected = _selectedIndex == index;
+            bool isSelected = _selectedIndex == index;
 
-            return GestureDetector(
-              onTap: () => _onItemTapped(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding:
-                    isSelected
-                        ? EdgeInsets.symmetric(
-                          horizontal: w * 0.05,
-                          vertical: h * 0.012,
-                        )
-                        : EdgeInsets.zero,
-                decoration: BoxDecoration(
-                  color:
-                      isSelected ? const Color(0xFF0B3D0B) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child:
-                    isSelected
-                        ? Row(
-                          children: [
-                            Image.asset(
-                              navItems[index]['icon']!,
-                              width: w * 0.06,
-                              height: w * 0.06,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: w * 0.02),
-                            Text(
-                              navItems[index]['label']!,
-                              style: GoogleFonts.crimsonPro(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: w * 0.038,
-                              ),
-                            ),
-                          ],
-                        )
-                        : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              navItems[index]['icon']!,
-                              width: w * 0.06,
-                              height: w * 0.06,
-                            ),
-                            SizedBox(height: h * 0.006),
-                            Text(
-                              navItems[index]['label']!,
-                              style: GoogleFonts.crimsonPro(
-                                fontSize: w * 0.032,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
+            if (isSelected) {
+              return GestureDetector(
+                onTap: () => _onItemTapped(index),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: paddingSelected,
+                    vertical: navHeight * 0.15,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0B3D0B),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        navItems[index]['icon']!,
+                        width: iconSize,
+                        height: iconSize,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: paddingSelected * 0.5),
+                      Text(
+                        navItems[index]['label']!,
+                        style: GoogleFonts.crimsonPro(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: fontSizeSelected,
                         ),
-              ),
-            );
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return GestureDetector(
+                onTap: () => _onItemTapped(index),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      navItems[index]['icon']!,
+                      width: iconSize,
+                      height: iconSize,
+                    ),
+                    SizedBox(height: navHeight * 0.05),
+                    Text(
+                      navItems[index]['label']!,
+                      style: GoogleFonts.crimsonPro(
+                        fontSize: fontSizeUnselected,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
           }),
         ),
       ),

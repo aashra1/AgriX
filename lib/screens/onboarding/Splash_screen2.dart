@@ -1,4 +1,4 @@
-import 'package:agrix/features/onboarding/Splash_screen3.dart';
+import 'package:agrix/screens/onboarding/Splash_screen3.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
