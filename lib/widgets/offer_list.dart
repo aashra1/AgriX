@@ -37,7 +37,7 @@ class OffersList extends StatelessWidget {
     final h = MediaQuery.of(context).size.height;
 
     return Container(
-      width: w * 0.65, 
+      width: w * 0.65,
       margin: EdgeInsets.only(right: w * 0.04),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
