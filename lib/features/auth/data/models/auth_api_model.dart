@@ -1,6 +1,5 @@
 import 'package:agrix/features/auth/domain/entities/auth_entity.dart';
 
-
 class AuthApiModel {
   final String? id;
   final String fullName;
@@ -8,7 +7,6 @@ class AuthApiModel {
   final String password;
   final String? phoneNumber;
   final String? address;
-
 
   AuthApiModel({
     this.id,
@@ -20,7 +18,7 @@ class AuthApiModel {
   });
 
   //To JSON
-   Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "fullName": fullName,
       "email": email,
@@ -30,18 +28,24 @@ class AuthApiModel {
     };
   }
 
-
-  // From JSON
   factory AuthApiModel.fromJson(Map<String, dynamic> json) {
-    final userJson = json['user'] ?? json;
+    Map<String, dynamic> userData;
+    if (json.containsKey('user') && json['user'] != null) {
+      userData = json['user'] as Map<String, dynamic>;
+      if (userData.containsKey('_doc')) {
+        userData = userData['_doc'] as Map<String, dynamic>;
+      }
+    } else {
+      userData = json;
+    }
 
     return AuthApiModel(
-      id: userJson['_id'] as String?,
-      fullName: userJson['fullName'] as String? ?? '',
-      email: userJson['email'] as String? ?? '',
-      password: userJson['password'] as String? ?? '',
-      phoneNumber: userJson['phoneNumber'] as String?,
-      address: userJson['address'] as String?,
+      id: userData['_id'] as String?,
+      fullName: userData['fullName'] as String? ?? '',
+      email: userData['email'] as String? ?? '',
+      password: userData['password'] as String? ?? '',
+      phoneNumber: userData['phoneNumber'] as String?,
+      address: userData['address'] as String?,
     );
   }
 

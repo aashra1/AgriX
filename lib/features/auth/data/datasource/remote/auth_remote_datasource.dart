@@ -31,15 +31,22 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
     );
 
     if (response.data['success'] == true) {
-      final data = response.data['data'] as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>;
       final user = AuthApiModel.fromJson(data);
+      final token = data['token'] as String?;
 
-      // Save user session
+      if (user.id == null) {
+        throw Exception('User ID is null in response');
+      }
+
+      // Save user session with token
       await _userSessionService.saveUserSession(
         authId: user.id!,
         email: user.email,
         fullName: user.fullName,
+        token: token,
       );
+
       return user;
     }
     return null;
@@ -53,7 +60,7 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
     );
 
     if (response.data['success'] == true) {
-      final data = response.data['data'] as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>;
       return AuthApiModel.fromJson(data);
     }
 

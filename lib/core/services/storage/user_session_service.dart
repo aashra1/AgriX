@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // SharedPreferences instance provider
@@ -14,40 +15,60 @@ final userSessionServiceProvider = Provider<UserSessionService>((ref) {
 
 class UserSessionService {
   final SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Keys for storing user data
   static const String _keyIsLoggedIn = 'is_logged_in';
   static const String _keyauthId = 'user_id';
   static const String _keyUserEmail = 'user_email';
   static const String _keyUserFullName = 'user_full_name';
-  static const String _keyUserUsername = 'user_username';
   static const String _keyUserPhoneNumber = 'user_phone_number';
   static const String _keyUserAddress = 'user_address';
+  static const String _keyToken = 'auth_token'; // For secure storage
 
   UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
 
-  // Save user session after login
+  // Save user session after login - UPDATED METHOD
   Future<void> saveUserSession({
     required String authId,
     required String email,
     required String fullName,
-    String? username,
     String? phoneNumber,
     String? address,
+    String? token, // Add token parameter
   }) async {
+    // Save to SharedPreferences
     await _prefs.setBool(_keyIsLoggedIn, true);
     await _prefs.setString(_keyauthId, authId);
     await _prefs.setString(_keyUserEmail, email);
     await _prefs.setString(_keyUserFullName, fullName);
-    if (username != null) {
-      await _prefs.setString(_keyUserUsername, username);
-    }
+
     if (phoneNumber != null) {
       await _prefs.setString(_keyUserPhoneNumber, phoneNumber);
     }
     if (address != null) {
       await _prefs.setString(_keyUserAddress, address);
     }
+
+    // Save token to secure storage
+    if (token != null) {
+      await _secureStorage.write(key: _keyToken, value: token);
+    }
+  }
+
+  // Get token from secure storage
+  Future<String?> getToken() async {
+    return await _secureStorage.read(key: _keyToken);
+  }
+
+  // Save token separately
+  Future<void> saveToken(String token) async {
+    await _secureStorage.write(key: _keyToken, value: token);
+  }
+
+  // Clear token
+  Future<void> clearToken() async {
+    await _secureStorage.delete(key: _keyToken);
   }
 
   // Check if user is logged in
@@ -75,14 +96,17 @@ class UserSessionService {
     return _prefs.getString(_keyUserPhoneNumber);
   }
 
-  // Clear user session (logout)
+  // Clear user session (logout) - UPDATED
   Future<void> clearSession() async {
+    // Clear SharedPreferences
     await _prefs.remove(_keyIsLoggedIn);
     await _prefs.remove(_keyauthId);
     await _prefs.remove(_keyUserEmail);
     await _prefs.remove(_keyUserFullName);
-    await _prefs.remove(_keyUserUsername);
     await _prefs.remove(_keyUserPhoneNumber);
     await _prefs.remove(_keyUserAddress);
+
+    // Clear secure storage token
+    await clearToken();
   }
 }
