@@ -1,5 +1,6 @@
 import 'package:agrix/core/constants/hive_table_constant.dart';
 import 'package:agrix/features/business/auth/data/models/business_auth_hive_model.dart';
+import 'package:agrix/features/business/buisness_dashboard/product/data/model/business_product_hive_model.dart';
 import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -186,6 +187,46 @@ class HiveService {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  Box<ProductHiveModel> get _productBox =>
+      Hive.box<ProductHiveModel>('products');
+
+  Future<void> addProduct(ProductHiveModel product) async {
+    await _productBox.put(product.productId, product);
+  }
+
+  List<ProductHiveModel> getBusinessProducts(String businessId) {
+    try {
+      return _productBox.values
+          .where((product) => product.businessId == businessId)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  ProductHiveModel? getProductById(String productId) {
+    try {
+      return _productBox.get(productId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateProduct(ProductHiveModel product) async {
+    await _productBox.put(product.productId, product);
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    await _productBox.delete(productId);
+  }
+
+  Future<void> clearBusinessProducts(String businessId) async {
+    final products = getBusinessProducts(businessId);
+    for (final product in products) {
+      await _productBox.delete(product.productId);
     }
   }
 }
