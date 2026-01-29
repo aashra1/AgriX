@@ -1,5 +1,6 @@
 import 'package:agrix/core/constants/hive_table_constant.dart';
-import 'package:agrix/features/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/business/auth/data/models/business_auth_hive_model.dart';
+import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,16 +21,22 @@ class HiveService {
     await _openBoxes();
   }
 
-  // Adapter register
   void _registerAdapter() {
     if (!Hive.isAdapterRegistered(HiveTableConstant.authTypeId)) {
       Hive.registerAdapter(AuthHiveModelAdapter());
+    }
+
+    if (!Hive.isAdapterRegistered(HiveTableConstant.businessAuthTypeId)) {
+      Hive.registerAdapter(BusinessAuthHiveModelAdapter());
     }
   }
 
   // box open
   Future<void> _openBoxes() async {
     await Hive.openBox<AuthHiveModel>(HiveTableConstant.authTable);
+    await Hive.openBox<BusinessAuthHiveModel>(
+      HiveTableConstant.businessAuthTable,
+    );
   }
 
   // box close
@@ -56,6 +63,129 @@ class HiveService {
       );
     } catch (e) {
       return null;
+    }
+  }
+
+  Box<BusinessAuthHiveModel> get _businessAuthBox =>
+      Hive.box<BusinessAuthHiveModel>(HiveTableConstant.businessAuthTable);
+
+  // Register business
+  Future<BusinessAuthHiveModel> registerBusiness(
+    BusinessAuthHiveModel business,
+  ) async {
+    await _businessAuthBox.put(business.businessId, business);
+    return business;
+  }
+
+  // Login business - find business by email and password
+  BusinessAuthHiveModel? loginBusiness(String email, String password) {
+    try {
+      return _businessAuthBox.values.firstWhere(
+        (business) => business.email == email && business.password == password,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Get business by ID
+  BusinessAuthHiveModel? getBusinessById(String businessId) {
+    try {
+      return _businessAuthBox.get(businessId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Get all businesses (for offline viewing if needed)
+  List<BusinessAuthHiveModel> getAllBusinesses() {
+    return _businessAuthBox.values.toList();
+  }
+
+  // Update business document path
+  Future<BusinessAuthHiveModel?> updateBusinessDocument(
+    String businessId,
+    String documentPath,
+  ) async {
+    try {
+      final business = _businessAuthBox.get(businessId);
+      if (business != null) {
+        final updatedBusiness = BusinessAuthHiveModel(
+          businessId: business.businessId,
+          businessName: business.businessName,
+          email: business.email,
+          password: business.password,
+          phoneNumber: business.phoneNumber,
+          address: business.address,
+          businessDocument: documentPath,
+          businessStatus: 'Pending',
+          businessVerified: false,
+        );
+        await _businessAuthBox.put(businessId, updatedBusiness);
+        return updatedBusiness;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Update business status (for offline sync)
+  Future<BusinessAuthHiveModel?> updateBusinessStatus(
+    String businessId,
+    String status,
+    bool verified,
+  ) async {
+    try {
+      final business = _businessAuthBox.get(businessId);
+      if (business != null) {
+        final updatedBusiness = BusinessAuthHiveModel(
+          businessId: business.businessId,
+          businessName: business.businessName,
+          email: business.email,
+          password: business.password,
+          phoneNumber: business.phoneNumber,
+          address: business.address,
+          businessDocument: business.businessDocument,
+          businessStatus: status,
+          businessVerified: verified,
+        );
+        await _businessAuthBox.put(businessId, updatedBusiness);
+        return updatedBusiness;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Check if business exists by email
+  bool businessExists(String email) {
+    try {
+      return _businessAuthBox.values.any((business) => business.email == email);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Clear all business data
+  Future<void> clearAllBusinesses() async {
+    await _businessAuthBox.clear();
+  }
+
+  // Delete specific business
+  Future<void> deleteBusiness(String businessId) async {
+    await _businessAuthBox.delete(businessId);
+  }
+
+  // Get businesses by status
+  List<BusinessAuthHiveModel> getBusinessesByStatus(String status) {
+    try {
+      return _businessAuthBox.values
+          .where((business) => business.businessStatus == status)
+          .toList();
+    } catch (e) {
+      return [];
     }
   }
 }

@@ -1,8 +1,8 @@
 import 'package:agrix/core/api/api_client.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
-import 'package:agrix/features/auth/data/datasource/auth_datasource.dart';
-import 'package:agrix/features/auth/data/models/auth_api_model.dart';
+import 'package:agrix/features/users/auth/data/datasource/auth_datasource.dart';
+import 'package:agrix/features/users/auth/data/models/auth_api_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // User Remote Datasource Provider

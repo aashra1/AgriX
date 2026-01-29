@@ -1,4 +1,4 @@
-import 'package:agrix/features/auth/domain/entities/auth_entity.dart';
+import 'package:agrix/features/users/auth/domain/entities/auth_entity.dart';
 
 class AuthApiModel {
   final String? id;

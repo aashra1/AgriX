@@ -1,6 +1,6 @@
 import 'package:agrix/core/services/hive/hive_service.dart';
-import 'package:agrix/features/auth/data/datasource/auth_datasource.dart';
-import 'package:agrix/features/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/users/auth/data/datasource/auth_datasource.dart';
+import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final authLocalDatasourceProvider = Provider<AuthLocalDatasource>((ref) {

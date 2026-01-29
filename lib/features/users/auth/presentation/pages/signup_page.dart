@@ -1,7 +1,7 @@
 import 'package:agrix/core/utils/snackbar_utils.dart';
-import 'package:agrix/features/auth/presentation/pages/login_page.dart';
-import 'package:agrix/features/auth/presentation/state/auth_state.dart';
-import 'package:agrix/features/auth/presentation/viewmodel/auth_viewmodel.dart';
+import 'package:agrix/features/users/auth/presentation/pages/login_page.dart';
+import 'package:agrix/features/users/auth/presentation/state/auth_state.dart';
+import 'package:agrix/features/users/auth/presentation/viewmodel/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';

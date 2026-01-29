@@ -1,11 +1,11 @@
 import 'package:agrix/core/usecases/app_usecases.dart';
-import 'package:agrix/features/auth/data/repositories/auth_repository.dart';
-import 'package:agrix/features/auth/domain/repository/auth_repository.dart';
+import 'package:agrix/features/users/auth/data/repositories/auth_repository.dart';
+import 'package:agrix/features/users/auth/domain/repository/auth_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/error/failure.dart';
+import '../../../../../core/error/failure.dart';
 import '../entities/auth_entity.dart';
 
 class RegisterUsecaseParams extends Equatable {

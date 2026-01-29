@@ -1,5 +1,5 @@
 import 'package:agrix/core/error/failure.dart';
-import 'package:agrix/features/auth/domain/entities/auth_entity.dart';
+import 'package:agrix/features/users/auth/domain/entities/auth_entity.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class IAuthRepository {

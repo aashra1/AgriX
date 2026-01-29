@@ -1,5 +1,5 @@
-import 'package:agrix/features/auth/data/models/auth_api_model.dart';
-import 'package:agrix/features/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/users/auth/data/models/auth_api_model.dart';
+import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
 
 abstract class IAuthLocalDatasource {
   Future<bool> registerUser(AuthHiveModel model);

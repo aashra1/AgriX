@@ -1,6 +1,6 @@
-import 'package:agrix/features/cart/cart.dart';
-import 'package:agrix/features/favorites/favorites.dart';
-import 'package:agrix/features/profile/profile.dart';
+import 'package:agrix/features/users/cart/cart.dart';
+import 'package:agrix/features/users/favorites/favorites.dart';
+import 'package:agrix/features/users/profile/profile.dart';
 import 'package:agrix/widgets/categories_list.dart';
 import 'package:agrix/widgets/custom_navbar.dart';
 import 'package:agrix/widgets/header_section.dart';

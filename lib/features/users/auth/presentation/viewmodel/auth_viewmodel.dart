@@ -1,6 +1,6 @@
-import 'package:agrix/features/auth/domain/use_cases/login_usecase.dart';
-import 'package:agrix/features/auth/domain/use_cases/register_usecase.dart';
-import 'package:agrix/features/auth/presentation/state/auth_state.dart';
+import 'package:agrix/features/users/auth/domain/use_cases/login_usecase.dart';
+import 'package:agrix/features/users/auth/domain/use_cases/register_usecase.dart';
+import 'package:agrix/features/users/auth/presentation/state/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // auth view model provider
