@@ -1,10 +1,10 @@
 import 'package:agrix/features/users/cart/cart.dart';
 import 'package:agrix/features/users/favorites/favorites.dart';
 import 'package:agrix/features/users/profile/profile.dart';
-import 'package:agrix/widgets/categories_list.dart';
-import 'package:agrix/widgets/custom_navbar.dart';
-import 'package:agrix/widgets/header_section.dart';
-import 'package:agrix/widgets/offer_list.dart';
+import 'package:agrix/features/users/home/widgets/categories_list.dart';
+import 'package:agrix/features/users/home/widgets/custom_navbar.dart';
+import 'package:agrix/features/users/home/widgets/header_section.dart';
+import 'package:agrix/features/users/home/widgets/offer_list.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
