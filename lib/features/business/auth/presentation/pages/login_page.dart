@@ -3,7 +3,7 @@ import 'package:agrix/core/utils/snackbar_utils.dart';
 import 'package:agrix/features/business/auth/presentation/pages/signup_page.dart';
 import 'package:agrix/features/business/auth/presentation/state/business_auth_state.dart';
 import 'package:agrix/features/business/auth/presentation/viewmodel/business_auth_viewmodel.dart';
-import 'package:agrix/features/business/home/business_homepage.dart';
+import 'package:agrix/features/business/buisness_dashboard/business_homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,7 +48,7 @@ class _BusinessLoginScreenState extends ConsumerState<BusinessLoginScreen> {
       next,
     ) {
       if (next.status == BusinessAuthStatus.authenticated) {
-        AppRoutes.pushReplacement(context, BusinessHomepage());
+        AppRoutes.pushReplacement(context, BusinessHomeScreen());
         showSnackBar(
           context: context,
           message: "Business Login Successful",

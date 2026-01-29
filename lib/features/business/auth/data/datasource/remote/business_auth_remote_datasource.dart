@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:agrix/core/api/api_client.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
@@ -44,7 +46,6 @@ class BusinessAuthRemoteDatasource implements IBusinessAuthRemoteDatasource {
         throw Exception('Business ID is null in response');
       }
 
-      // Save business session with token
       await _userSessionService.saveUserSession(
         authId: business.id!,
         email: business.email,
@@ -70,32 +71,58 @@ class BusinessAuthRemoteDatasource implements IBusinessAuthRemoteDatasource {
       final data = response.data as Map<String, dynamic>;
       final business = BusinessAuthApiModel.fromJson(data);
       final tempToken = data['tempToken'] as String?;
+      final message = data['message'] as String? ?? 'Registration successful';
+
+      if (tempToken != null && business.id != null) {
+        await _userSessionService.saveUserSession(
+          authId: business.id!,
+          email: business.email,
+          fullName: business.businessName,
+          token: tempToken,
+        );
+      }
 
       return {
         'business': business.toBusinessAuthEntity(),
         'tempToken': tempToken,
-        'message': data['message'] as String? ?? 'Registration successful',
+        'message': message,
       };
     }
 
     throw Exception('Registration failed: ${response.data['message']}');
   }
 
-   @override
+  @override
   Future<BusinessAuthApiModel> uploadBusinessDocument({
     required String businessId,
     required String documentPath,
     required String token,
   }) async {
+    // Validate file exists
+    final file = File(documentPath);
+    if (!await file.exists()) {
+      throw Exception('File does not exist: $documentPath');
+    }
+
+    final fileName = file.path.split('/').last;
+
+    // Create multipart form data
+    final formData = FormData.fromMap({
+      'businessId': businessId,
+      'document': await MultipartFile.fromFile(
+        documentPath,
+        filename: fileName,
+      ),
+    });
+
     final response = await _apiClient.post(
       ApiEndpoints.businessUploadDocument,
-      data: {
-        'businessId': businessId,
-        'documentPath': documentPath,
-      },
-      options: Options(headers: {
-        'Authorization': 'Bearer $token',
-      }),
+      data: formData,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+        sendTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
+      ),
     );
 
     if (response.data['success'] == true) {
@@ -106,4 +133,3 @@ class BusinessAuthRemoteDatasource implements IBusinessAuthRemoteDatasource {
     throw Exception('Document upload failed: ${response.data['message']}');
   }
 }
-  

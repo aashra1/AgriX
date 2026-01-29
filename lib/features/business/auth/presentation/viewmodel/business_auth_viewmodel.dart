@@ -108,9 +108,18 @@ class BusinessAuthViewModel extends Notifier<BusinessAuthState> {
   Future<void> uploadBusinessDocument({
     required String businessId,
     required String documentPath,
-    required String token,
   }) async {
     state = state.copyWith(status: BusinessAuthStatus.documentUploading);
+
+    final token = state.tempToken;
+
+    if (token == null) {
+      state = state.copyWith(
+        status: BusinessAuthStatus.error,
+        errorMessage: 'No temporary token found. Please register again.',
+      );
+      return;
+    }
 
     final uploadParams = UploadDocumentUsecaseParams(
       businessId: businessId,
@@ -132,6 +141,7 @@ class BusinessAuthViewModel extends Notifier<BusinessAuthState> {
           status: BusinessAuthStatus.documentUploaded,
           businessEntity: updatedBusiness,
           uploadedDocumentPath: documentPath,
+          tempToken: null,
         );
       },
     );

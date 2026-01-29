@@ -60,7 +60,6 @@ class _BusinessDocumentUploadScreenState
         .uploadBusinessDocument(
           businessId: widget.businessEntity.businessId ?? '',
           documentPath: _selectedDocument!.path,
-          token: widget.tempToken,
         );
 
     setState(() => _isUploading = false);
