@@ -246,8 +246,9 @@ class _BusinessSignupScreenState extends ConsumerState<BusinessSignupScreen> {
                   SizedBox(height: h * 0.02),
 
                   /// LOGIN LINK
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         "Already have a business account?",
