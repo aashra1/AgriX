@@ -239,7 +239,7 @@ class _BusinessLoginScreenState extends ConsumerState<BusinessLoginScreen> {
                     width: w * 0.6,
                     height: h * 0.065,
                     child: ElevatedButton(
-                      onPressed: _handleLogin, // <-- form validation used
+                      onPressed: _handleLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0B3D0B),
                         shape: RoundedRectangleBorder(
@@ -259,8 +259,9 @@ class _BusinessLoginScreenState extends ConsumerState<BusinessLoginScreen> {
                   SizedBox(height: h * 0.02),
 
                   /// SIGNUP LINK
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         "Don't have a business account?",
