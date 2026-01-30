@@ -50,9 +50,12 @@ class ProductRepository implements IProductRepository {
     String? imagePath,
     required String token,
   }) async {
-    if (await _networkInfo.isConnected) {
-      try {
-        // Prepare product data for API
+    try {
+      final isConnected = await _networkInfo.isConnected;
+
+      // Handle null case - assume offline if null
+      if (isConnected == true) {
+        // Online logic
         final productData = {
           'name': name,
           'category': categoryId,
@@ -68,33 +71,20 @@ class ProductRepository implements IProductRepository {
             'fullDescription': fullDescription,
         };
 
-        // Call remote API
         final apiModel = await _remoteDatasource.addProduct(
           productData: productData,
           token: token,
           imagePath: imagePath,
         );
 
-        // Save to local storage
         final hiveModel = ProductHiveModel.fromEntity(
           apiModel.toProductEntity(),
         );
         await _localDatasource.addProduct(hiveModel);
 
         return Right(apiModel.toProductEntity());
-      } on DioException catch (e) {
-        return Left(
-          ApiFailure(
-            message: e.response?.data['message'] ?? 'Failed to add product',
-            statusCode: e.response?.statusCode,
-          ),
-        );
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    } else {
-      try {
-        // Create local product for offline mode
+      } else {
+        // Offline logic - create local product
         final localProduct = ProductHiveModel(
           businessId: '', // Will be set when syncing
           name: name,
@@ -112,9 +102,22 @@ class ProductRepository implements IProductRepository {
 
         await _localDatasource.addProduct(localProduct);
         return Right(localProduct.toEntity());
-      } catch (e) {
+      }
+    } on DioException catch (e) {
+      return Left(
+        ApiFailure(
+          message: e.response?.data['message'] ?? 'Failed to add product',
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } catch (e) {
+      // Check if it's a local database error (offline case)
+      if (e.toString().contains('LocalDatabaseFailure') ||
+          e.toString().contains('Hive') ||
+          e.toString().contains('local')) {
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -122,44 +125,43 @@ class ProductRepository implements IProductRepository {
   Future<Either<Failure, List<ProductEntity>>> getBusinessProducts({
     required String token,
   }) async {
-    if (await _networkInfo.isConnected) {
-      try {
+    try {
+      final isConnected = await _networkInfo.isConnected;
+
+      if (isConnected == true) {
         final apiProducts = await _remoteDatasource.getBusinessProducts(token);
 
-        // Get business ID from first product or storage
         final businessId =
             apiProducts.isNotEmpty ? apiProducts.first.businessId : '';
 
-        // Sync to local storage
         if (businessId.isNotEmpty) {
           await _localDatasource.syncProducts(businessId, apiProducts);
         }
 
         final entities = ProductApiModel.toProductEntityList(apiProducts);
         return Right(entities);
-      } on DioException catch (e) {
-        return Left(
-          ApiFailure(
-            message: e.response?.data['message'] ?? 'Failed to fetch products',
-            statusCode: e.response?.statusCode,
-          ),
-        );
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    } else {
-      try {
-        // Get business ID from local storage (you need to implement this)
+      } else {
         final businessId = ''; // Get from UserSessionService
-
         final localProducts = await _localDatasource.getBusinessProducts(
           businessId,
         );
         final entities = ProductHiveModel.toEntityList(localProducts);
         return Right(entities);
-      } catch (e) {
+      }
+    } on DioException catch (e) {
+      return Left(
+        ApiFailure(
+          message: e.response?.data['message'] ?? 'Failed to fetch products',
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } catch (e) {
+      if (e.toString().contains('LocalDatabaseFailure') ||
+          e.toString().contains('Hive') ||
+          e.toString().contains('local')) {
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -168,40 +170,42 @@ class ProductRepository implements IProductRepository {
     required String productId,
     required String token,
   }) async {
-    if (await _networkInfo.isConnected) {
-      try {
+    try {
+      final isConnected = await _networkInfo.isConnected;
+
+      if (isConnected == true) {
         final apiModel = await _remoteDatasource.getProductById(
           productId: productId,
           token: token,
         );
 
-        // Update local storage
         final hiveModel = ProductHiveModel.fromEntity(
           apiModel.toProductEntity(),
         );
         await _localDatasource.updateProduct(hiveModel);
 
         return Right(apiModel.toProductEntity());
-      } on DioException catch (e) {
-        return Left(
-          ApiFailure(
-            message: e.response?.data['message'] ?? 'Failed to fetch product',
-            statusCode: e.response?.statusCode,
-          ),
-        );
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    } else {
-      try {
+      } else {
         final localProduct = await _localDatasource.getProductById(productId);
         if (localProduct != null) {
           return Right(localProduct.toEntity());
         }
         return Left(LocalDatabaseFailure(message: 'Product not found locally'));
-      } catch (e) {
+      }
+    } on DioException catch (e) {
+      return Left(
+        ApiFailure(
+          message: e.response?.data['message'] ?? 'Failed to fetch product',
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } catch (e) {
+      if (e.toString().contains('LocalDatabaseFailure') ||
+          e.toString().contains('Hive') ||
+          e.toString().contains('local')) {
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -221,9 +225,10 @@ class ProductRepository implements IProductRepository {
     String? imagePath,
     required String token,
   }) async {
-    if (await _networkInfo.isConnected) {
-      try {
-        // Prepare update data
+    try {
+      final isConnected = await _networkInfo.isConnected;
+
+      if (isConnected == true) {
         final updateData = <String, dynamic>{};
         if (name != null) updateData['name'] = name;
         if (categoryId != null) updateData['category'] = categoryId;
@@ -245,26 +250,13 @@ class ProductRepository implements IProductRepository {
           imagePath: imagePath,
         );
 
-        // Update local storage
         final hiveModel = ProductHiveModel.fromEntity(
           apiModel.toProductEntity(),
         );
         await _localDatasource.updateProduct(hiveModel);
 
         return Right(apiModel.toProductEntity());
-      } on DioException catch (e) {
-        return Left(
-          ApiFailure(
-            message: e.response?.data['message'] ?? 'Failed to update product',
-            statusCode: e.response?.statusCode,
-          ),
-        );
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    } else {
-      try {
-        // Get existing product
+      } else {
         final existingProduct = await _localDatasource.getProductById(
           productId,
         );
@@ -272,7 +264,6 @@ class ProductRepository implements IProductRepository {
           return Left(LocalDatabaseFailure(message: 'Product not found'));
         }
 
-        // Create updated model
         final updatedModel = ProductHiveModel(
           productId: productId,
           businessId: existingProduct.businessId,
@@ -295,9 +286,21 @@ class ProductRepository implements IProductRepository {
 
         await _localDatasource.updateProduct(updatedModel);
         return Right(updatedModel.toEntity());
-      } catch (e) {
+      }
+    } on DioException catch (e) {
+      return Left(
+        ApiFailure(
+          message: e.response?.data['message'] ?? 'Failed to update product',
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } catch (e) {
+      if (e.toString().contains('LocalDatabaseFailure') ||
+          e.toString().contains('Hive') ||
+          e.toString().contains('local')) {
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 
@@ -306,8 +309,10 @@ class ProductRepository implements IProductRepository {
     required String productId,
     required String token,
   }) async {
-    if (await _networkInfo.isConnected) {
-      try {
+    try {
+      final isConnected = await _networkInfo.isConnected;
+
+      if (isConnected == true) {
         final isDeleted = await _remoteDatasource.deleteProduct(
           productId: productId,
           token: token,
@@ -318,23 +323,24 @@ class ProductRepository implements IProductRepository {
         }
 
         return Right(isDeleted);
-      } on DioException catch (e) {
-        return Left(
-          ApiFailure(
-            message: e.response?.data['message'] ?? 'Failed to delete product',
-            statusCode: e.response?.statusCode,
-          ),
-        );
-      } catch (e) {
-        return Left(ApiFailure(message: e.toString()));
-      }
-    } else {
-      try {
+      } else {
         await _localDatasource.deleteProduct(productId);
         return Right(true);
-      } catch (e) {
+      }
+    } on DioException catch (e) {
+      return Left(
+        ApiFailure(
+          message: e.response?.data['message'] ?? 'Failed to delete product',
+          statusCode: e.response?.statusCode,
+        ),
+      );
+    } catch (e) {
+      if (e.toString().contains('LocalDatabaseFailure') ||
+          e.toString().contains('Hive') ||
+          e.toString().contains('local')) {
         return Left(LocalDatabaseFailure(message: e.toString()));
       }
+      return Left(ApiFailure(message: e.toString()));
     }
   }
 }
