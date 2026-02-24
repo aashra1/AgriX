@@ -7,9 +7,10 @@ final productViewModelProvider =
     NotifierProvider<ProductViewModel, ProductState>(() => ProductViewModel());
 
 class ProductViewModel extends Notifier<ProductState> {
-  late final AddProductUsecase _addProductUsecase;
-  late final GetBusinessProductsUsecase _getBusinessProductsUsecase;
-  late final DeleteProductUsecase _deleteProductUsecase;
+  late AddProductUsecase _addProductUsecase;
+  late GetBusinessProductsUsecase _getBusinessProductsUsecase;
+  late DeleteProductUsecase _deleteProductUsecase;
+  UpdateProductUsecase? _updateProductUsecase;
 
   @override
   ProductState build() {
@@ -19,7 +20,6 @@ class ProductViewModel extends Notifier<ProductState> {
     return ProductState();
   }
 
-  // Add Product
   Future<void> addProduct({
     required String name,
     required String categoryId,
@@ -71,7 +71,6 @@ class ProductViewModel extends Notifier<ProductState> {
     );
   }
 
-  // Get Business Products
   Future<void> getBusinessProducts({required String token}) async {
     state = state.copyWith(status: ProductStatus.loading);
 
@@ -94,7 +93,76 @@ class ProductViewModel extends Notifier<ProductState> {
     );
   }
 
-  // Delete Product
+  Future<void> updateProduct({
+    required String productId,
+    String? name,
+    String? categoryId,
+    double? price,
+    int? stock,
+    String? brand,
+    double? discount,
+    double? weight,
+    String? unitType,
+    String? shortDescription,
+    String? fullDescription,
+    String? imagePath,
+    required String token,
+  }) async {
+    state = state.copyWith(status: ProductStatus.updating);
+
+    try {
+      _updateProductUsecase ??= ref.read(updateProductUsecaseProvider);
+
+      if (_updateProductUsecase == null) {
+        throw Exception("Failed to initialize update product usecase");
+      }
+
+      final params = UpdateProductUsecaseParams(
+        productId: productId,
+        name: name,
+        categoryId: categoryId,
+        price: price,
+        stock: stock,
+        brand: brand,
+        discount: discount,
+        weight: weight,
+        unitType: unitType,
+        shortDescription: shortDescription,
+        fullDescription: fullDescription,
+        imagePath: imagePath,
+        token: token,
+      );
+
+      final result = await _updateProductUsecase!.call(params);
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            status: ProductStatus.error,
+            errorMessage: failure.message,
+          );
+        },
+        (product) {
+          final updatedProducts =
+              state.products.map((p) {
+                return p.id == product.id ? product : p;
+              }).toList();
+
+          state = state.copyWith(
+            status: ProductStatus.updated,
+            products: updatedProducts,
+            selectedProduct: product,
+          );
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: ProductStatus.error,
+        errorMessage: "Failed to update product: $e",
+      );
+    }
+  }
+
   Future<void> deleteProduct({
     required String productId,
     required String token,
@@ -130,22 +198,18 @@ class ProductViewModel extends Notifier<ProductState> {
     );
   }
 
-  // Select Product
   void selectProduct(ProductEntity product) {
     state = state.copyWith(selectedProduct: product);
   }
 
-  // Clear Selection
   void clearSelection() {
     state = state.copyWith(selectedProduct: null);
   }
 
-  // Clear Error
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }
 
-  // Reset State
   void reset() {
     state = ProductState();
   }
