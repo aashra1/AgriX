@@ -1,7 +1,7 @@
 import 'package:agrix/app/theme/app_colors.dart';
 import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/features/business/buisness_dashboard/orders/presentation/view/business_orders_screen.dart';
-import 'package:agrix/features/business/buisness_dashboard/payments/business_payments_screen.dart';
+import 'package:agrix/features/business/buisness_dashboard/payments/presentation/view/business_payments_screen.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_header_section.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_products_list.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_side_drawer.dart';
@@ -21,7 +21,7 @@ class _BusinessHomeScreenState extends State<BusinessHomeScreen> {
   final List<String> _titles = [
     "Dashboard",
     "Order Management",
-    "Payments",
+    "Earnings",
     "Profile",
   ];
 
