@@ -1,5 +1,6 @@
 import 'package:agrix/core/constants/hive_table_constant.dart';
 import 'package:agrix/features/business/auth/data/models/business_auth_hive_model.dart';
+import 'package:agrix/features/business/buisness_dashboard/orders/data/model/business_order_hive_model.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/data/model/business_product_hive_model.dart';
 import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -227,6 +228,53 @@ class HiveService {
     final products = getBusinessProducts(businessId);
     for (final product in products) {
       await _productBox.delete(product.productId);
+    }
+  }
+
+  // order
+  // Add to lib/core/services/hive/hive_service.dart
+
+  Future<void> addBusinessOrder(BusinessOrderHiveModel order) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    await box.put(order.id, order);
+  }
+
+  Future<List<BusinessOrderHiveModel>> getBusinessOrders(
+    String businessId,
+  ) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    return box.values.where((order) {
+      return order.items.any((item) => item.businessId == businessId);
+    }).toList();
+  }
+
+  Future<BusinessOrderHiveModel?> getBusinessOrderById(String orderId) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    return box.get(orderId);
+  }
+
+  Future<void> updateBusinessOrder(BusinessOrderHiveModel order) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    await box.put(order.id, order);
+  }
+
+  Future<void> deleteBusinessOrder(String orderId) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    await box.delete(orderId);
+  }
+
+  Future<void> clearBusinessOrders(String businessId) async {
+    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
+    final ordersToDelete =
+        box.values
+            .where((order) {
+              return order.items.any((item) => item.businessId == businessId);
+            })
+            .map((order) => order.id)
+            .toList();
+
+    for (final id in ordersToDelete) {
+      await box.delete(id);
     }
   }
 }
