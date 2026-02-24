@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mocks
 class MockBusinessLoginUsecase extends Mock implements BusinessLoginUsecase {}
 
 class MockBusinessRegisterUsecase extends Mock
@@ -18,7 +17,6 @@ class MockBusinessRegisterUsecase extends Mock
 
 class MockUploadDocumentUsecase extends Mock implements UploadDocumentUsecase {}
 
-// Fake Params for Mocktail to handle .call(any())
 class FakeLoginParams extends Fake implements BusinessLoginUsecaseParams {}
 
 class FakeRegisterParams extends Fake
@@ -30,7 +28,6 @@ void main() {
   late MockBusinessRegisterUsecase mockRegisterUsecase;
   late MockUploadDocumentUsecase mockUploadUsecase;
 
-  // Test Data
   final tBusiness = BusinessAuthEntity(
     businessId: '1',
     businessName: 'AgriX Corp',
