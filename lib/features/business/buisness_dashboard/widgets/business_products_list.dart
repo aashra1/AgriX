@@ -1,3 +1,5 @@
+import 'package:agrix/app/theme/app_colors.dart';
+import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/domain/entity/business_product_entity.dart';
@@ -7,7 +9,6 @@ import 'package:agrix/features/business/buisness_dashboard/product/presentation/
 import 'package:agrix/features/business/buisness_dashboard/product/presentation/viewmodel/business_product_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class BusinessProductsList extends ConsumerStatefulWidget {
   const BusinessProductsList({super.key});
@@ -21,16 +22,12 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final token = await ref.read(userSessionServiceProvider).getToken();
-
       if (token != null) {
         ref
             .read(productViewModelProvider.notifier)
             .getBusinessProducts(token: token);
-      } else {
-        debugPrint("No token found. User might not be authenticated.");
       }
     });
   }
@@ -43,19 +40,14 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// 1. Section Title and Add Button
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: w * 0.05, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: w * 0.05, vertical: 15),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Your products",
-                style: GoogleFonts.crimsonPro(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+                "Your Products",
+                style: AppStyles.bodyLarge.copyWith(fontSize: 20),
               ),
               GestureDetector(
                 onTap: () {
@@ -67,21 +59,21 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(
-                      0xFFF3F3F3,
-                    ), // Match grey button background
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.primaryGreen.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.add, size: 24, color: Colors.black),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    size: 20,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
               ),
             ],
           ),
         ),
-
-        /// 2. Product Grid
         _buildProductGrid(productState, w),
       ],
     );
@@ -90,9 +82,9 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
   Widget _buildProductGrid(ProductState state, double w) {
     if (state.status == ProductStatus.loading) {
       return const Padding(
-        padding: EdgeInsets.all(40.0),
+        padding: EdgeInsets.all(50.0),
         child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF0B3D0B)),
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
         ),
       );
     }
@@ -102,10 +94,10 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
     if (products.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(30.0),
+          padding: const EdgeInsets.all(40.0),
           child: Text(
             "No products added yet.",
-            style: GoogleFonts.crimsonPro(fontSize: 16, color: Colors.grey),
+            style: AppStyles.bodyMedium.copyWith(color: AppColors.textGrey),
           ),
         ),
       );
@@ -117,9 +109,9 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
       padding: EdgeInsets.symmetric(horizontal: w * 0.05),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 18,
-        mainAxisSpacing: 20,
-        childAspectRatio: 0.85,
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+        childAspectRatio: 0.75,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -133,7 +125,7 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
               ),
             );
           },
-          child: _buildProductCard(product), // Calls the UI-only method below
+          child: _buildProductCard(product),
         );
       },
     );
@@ -141,50 +133,128 @@ class _BusinessProductsListState extends ConsumerState<BusinessProductsList> {
 
   Widget _buildProductCard(ProductEntity product) {
     final String fileName = product.image?.split('/').last ?? "";
-
     final String fullImageUrl = "${ApiEndpoints.imageUrl}/$fileName";
 
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child:
-                  fileName.isNotEmpty
-                      ? Image.network(
-                        fullImageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.broken_image,
-                            color: Colors.grey,
-                          );
-                        },
-                      )
-                      : const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Colors.grey,
-                        size: 40,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.imagePlaceholderGrey,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                    child:
+                        fileName.isNotEmpty
+                            ? Image.network(
+                              fullImageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (context, error, stackTrace) => const Icon(
+                                    Icons.broken_image,
+                                    color: AppColors.iconGrey,
+                                  ),
+                            )
+                            : const Icon(
+                              Icons.shopping_bag_outlined,
+                              color: AppColors.iconGrey,
+                              size: 30,
+                            ),
+                  ),
+                ),
+                if (product.stock < 5)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
+                      decoration: BoxDecoration(
+                        color: AppColors.logoutRed.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        "Low Stock",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          product.name,
-          style: GoogleFonts.crimsonPro(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    product.categoryName ?? "General",
+                    style: AppStyles.caption.copyWith(
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "NPR ${product.price}",
+                        style: AppStyles.bodyMedium.copyWith(
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 12,
+                        color: AppColors.iconGrey,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
