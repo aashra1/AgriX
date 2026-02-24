@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:agrix/app/theme/app_colors.dart';
+import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/core/utils/snackbar_utils.dart';
 import 'package:agrix/features/business/buisness_dashboard/business_homepage.dart';
@@ -10,7 +12,6 @@ import 'package:agrix/features/category/presentation/viewmodel/category_viewmode
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class BusinessAddProductScreen extends ConsumerStatefulWidget {
   const BusinessAddProductScreen({super.key});
@@ -26,7 +27,6 @@ class _BusinessAddProductScreenState
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Controllers
   final _nameController = TextEditingController();
   final _brandController = TextEditingController();
   final _priceController = TextEditingController();
@@ -49,6 +49,21 @@ class _BusinessAddProductScreenState
     });
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _brandController.dispose();
+    _priceController.dispose();
+    _discountController.dispose();
+    _stockController.dispose();
+    _weightController.dispose();
+    _unitTypeController.dispose();
+    _shortDescriptionController.dispose();
+    _fullDescriptionController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.isNotEmpty) {
@@ -57,7 +72,7 @@ class _BusinessAddProductScreenState
   }
 
   void _nextPage() {
-    if (_currentPage == 0) {
+    if (_formKey.currentState!.validate()) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
@@ -65,12 +80,27 @@ class _BusinessAddProductScreenState
     }
   }
 
+  void _previousPage() {
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedCategoryId == null || _selectedImage == null) {
+      if (_selectedImage == null) {
         showSnackBar(
           context: context,
-          message: 'Please complete all required fields and image',
+          message: 'Please add a product image',
+          isSuccess: false,
+        );
+        return;
+      }
+      if (_selectedCategoryId == null) {
+        showSnackBar(
+          context: context,
+          message: 'Please select a category',
           isSuccess: false,
         );
         return;
@@ -116,6 +146,11 @@ class _BusinessAddProductScreenState
 
     ref.listen<ProductState>(productViewModelProvider, (previous, next) {
       if (next.status == ProductStatus.added) {
+        showSnackBar(
+          context: context,
+          message: 'Product added successfully!',
+          isSuccess: true,
+        );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const BusinessHomeScreen()),
           (route) => false,
@@ -124,42 +159,98 @@ class _BusinessAddProductScreenState
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        leadingWidth: 70,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            icon: CircleAvatar(
-              backgroundColor: Colors.grey.shade200,
-              child: const Icon(
-                Icons.arrow_back,
-                color: Colors.black,
-                size: 20,
+          padding: const EdgeInsets.only(left: 16),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundGrey,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: AppColors.textBlack,
+                  size: 18,
+                ),
               ),
             ),
-            onPressed: () {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                  builder: (context) => const BusinessHomeScreen(),
-                ),
-                (route) => false,
-              );
-            },
           ),
         ),
+        title: Text(
+          'Add New Product',
+          style: AppStyles.bodyLarge.copyWith(fontSize: 18),
+        ),
+        centerTitle: true,
       ),
       body: Form(
         key: _formKey,
-        child: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          onPageChanged: (int page) => setState(() => _currentPage = page),
+        child: Column(
           children: [
-            _buildFirstPage(w, categoryState.categories),
-            _buildSecondPage(w),
+            const SizedBox(height: 10),
+            _buildStepper(w),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged:
+                    (int page) => setState(() => _currentPage = page),
+                children: [
+                  _buildFirstPage(w, categoryState.categories),
+                  _buildSecondPage(w),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepper(double w) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: w * 0.1),
+      child: Row(
+        children: [
+          _stepperCircle(isActive: true, label: "1"),
+          Expanded(
+            child: Divider(
+              color:
+                  _currentPage == 1
+                      ? AppColors.primaryGreen
+                      : AppColors.backgroundGrey,
+              thickness: 2,
+            ),
+          ),
+          _stepperCircle(isActive: _currentPage == 1, label: "2"),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepperCircle({required bool isActive, required String label}) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.primaryGreen : AppColors.backgroundGrey,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? Colors.white : AppColors.textGrey,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -167,81 +258,113 @@ class _BusinessAddProductScreenState
 
   Widget _buildFirstPage(double w, List<CategoryEntity> categories) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.08),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.06),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Add your product",
-            style: GoogleFonts.crimsonPro(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "Please enter all the details",
-            style: GoogleFonts.crimsonPro(fontSize: 16, color: Colors.grey),
-          ),
           const SizedBox(height: 20),
           Text(
-            "Add Image:",
-            style: GoogleFonts.crimsonPro(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            "Product Overview",
+            style: AppStyles.headline1.copyWith(fontSize: 22),
           ),
           Text(
-            "Image that best describes your product",
-            style: GoogleFonts.crimsonPro(fontSize: 12, color: Colors.blueGrey),
+            "Start by adding an image and basic info",
+            style: AppStyles.bodyMedium.copyWith(color: AppColors.textGrey),
           ),
+          const SizedBox(height: 25),
+          _sectionHeader("Product Visual"),
           const SizedBox(height: 10),
           GestureDetector(
             onTap: _pickImage,
             child: Container(
-              height: 180,
+              height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: AppColors.inputBackground,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.backgroundGrey),
               ),
               child:
                   _selectedImage == null
-                      ? Icon(Icons.image, size: 50, color: Colors.grey)
+                      ? const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_a_photo_outlined,
+                            size: 40,
+                            color: AppColors.iconGrey,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Tap to upload",
+                            style: TextStyle(color: AppColors.textGrey),
+                          ),
+                        ],
+                      )
                       : ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.file(_selectedImage!, fit: BoxFit.cover),
                       ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 25),
+          _sectionHeader("Identification"),
           _inputLabel("Product Name"),
-          _textField(_nameController, "Product Name"),
+          _textField(_nameController, "e.g. Fresh Tomatoes", isRequired: true),
           _inputLabel("Category"),
           _dropdownField(categories),
-          _inputLabel("Brand / Manufacturer (optional)"),
-          _textField(_brandController, "Brand / Manufacturer"),
-          _inputLabel("Price"),
-          _textField(
-            _priceController,
-            "Price",
-            keyboardType: TextInputType.number,
-          ),
-          _inputLabel("Discount (optional)"),
-          _textField(
-            _discountController,
-            "Discount",
-            keyboardType: TextInputType.number,
+          _inputLabel("Brand (Optional)"),
+          _textField(_brandController, "e.g. Local Farms"),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _inputLabel("Price (NPR)"),
+                    _textField(
+                      _priceController,
+                      "0.00",
+                      keyboardType: TextInputType.number,
+                      isRequired: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _inputLabel("Discount (%)"),
+                    _textField(
+                      _discountController,
+                      "0",
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 30),
           Align(
             alignment: Alignment.centerRight,
-            child: FloatingActionButton(
-              backgroundColor: Colors.grey.shade300,
+            child: ElevatedButton(
               onPressed: _nextPage,
-              child: const Icon(Icons.arrow_forward, color: Colors.black),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(15),
+              ),
+              child: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
         ],
       ),
     );
@@ -249,72 +372,127 @@ class _BusinessAddProductScreenState
 
   Widget _buildSecondPage(double w) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: w * 0.08),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.06),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          _inputLabel("Stock"),
+          _sectionHeader("Inventory Details"),
+          _inputLabel("Initial Stock"),
           _textField(
             _stockController,
-            "Stock",
+            "Amount available",
             keyboardType: TextInputType.number,
+            isRequired: true,
           ),
-          _inputLabel("Weight/Volume"),
-          _textField(
-            _weightController,
-            "Weight / Volume",
-            keyboardType: TextInputType.number,
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _inputLabel("Weight/Vol"),
+                    _textField(
+                      _weightController,
+                      "e.g. 1.5",
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _inputLabel("Unit Type"),
+                    _textField(_unitTypeController, "e.g. kg, ltr"),
+                  ],
+                ),
+              ),
+            ],
           ),
-          _inputLabel("Unit Type"),
-          _textField(_unitTypeController, "Unit Type"),
-          _inputLabel("Short Description"),
-          _textField(_shortDescriptionController, "Short Description"),
-          _inputLabel("Full Description"),
+          const SizedBox(height: 25),
+          _sectionHeader("Description"),
+          _inputLabel("Short Tagline"),
+          _textField(_shortDescriptionController, "Brief catchy summary..."),
+          _inputLabel("Full Details"),
           _textField(
             _fullDescriptionController,
-            "Full Description",
+            "Detailed product info...",
             maxLines: 5,
           ),
-          const SizedBox(height: 50),
-          Center(
-            child: SizedBox(
-              width: w * 0.6,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0B3D0B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+          const SizedBox(height: 40),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _previousPage,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: AppColors.backgroundGrey),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  child: Text("Back", style: AppStyles.bodyMedium),
                 ),
-                onPressed: _isLoading ? null : _submitForm,
-                child:
-                    _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                          "Add Product",
-                          style: GoogleFonts.crimsonPro(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
               ),
-            ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryGreen,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : Text(
+                            "Add Product",
+                            style: AppStyles.buttonText.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 50),
         ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Text(
+      title,
+      style: AppStyles.bodyLarge.copyWith(
+        color: AppColors.primaryGreen,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
 
   Widget _inputLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 15, bottom: 5),
+      padding: const EdgeInsets.only(top: 15, bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.crimsonPro(
-          fontSize: 16,
-          color: Colors.grey.shade700,
+        style: AppStyles.caption.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textBlack,
         ),
       ),
     );
@@ -325,53 +503,54 @@ class _BusinessAddProductScreenState
     String hint, {
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    bool isRequired = false,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      style: AppStyles.bodyMedium,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.crimsonPro(
-          color: const Color(0xFF1D264F),
-          fontWeight: FontWeight.bold,
+        hintStyle: AppStyles.inputField.copyWith(
+          color: AppColors.textGrey.withOpacity(0.5),
         ),
         filled: true,
-        fillColor: const Color(0xFFF5F6FA),
+        fillColor: AppColors.inputBackground,
+        contentPadding: const EdgeInsets.all(16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
       ),
+      validator:
+          (val) =>
+              isRequired && (val == null || val.isEmpty) ? "Required" : null,
     );
   }
 
   Widget _dropdownField(List<CategoryEntity> categories) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
+        color: AppColors.inputBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButtonFormField<String>(
           initialValue: _selectedCategoryId,
-          hint: Text(
-            "Category",
-            style: GoogleFonts.crimsonPro(
-              color: const Color(0xFF1D264F),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           items:
               categories
                   .map(
-                    (cat) =>
-                        DropdownMenuItem(value: cat.id, child: Text(cat.name)),
+                    (cat) => DropdownMenuItem(
+                      value: cat.id,
+                      child: Text(cat.name, style: AppStyles.bodyMedium),
+                    ),
                   )
                   .toList(),
           onChanged: (val) => setState(() => _selectedCategoryId = val),
           decoration: const InputDecoration(border: InputBorder.none),
+          validator: (val) => val == null ? "Select Category" : null,
         ),
       ),
     );
