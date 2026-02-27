@@ -22,4 +22,7 @@ class HiveTableConstant {
   // User Profile tables
   static const String userProfileTable = 'userProfile';
   static const int userProfileTypeId = 4;
+
+  static const String userProductTable = 'userProducts';
+  static const int userProductTypeId = 5;
 }
