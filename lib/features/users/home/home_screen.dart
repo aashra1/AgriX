@@ -1,4 +1,4 @@
-import 'package:agrix/features/users/cart/cart.dart';
+import 'package:agrix/features/users/cart/presentation/view/cart.dart';
 import 'package:agrix/features/users/favorites/favorites.dart';
 import 'package:agrix/features/users/home/widgets/categories_list.dart';
 import 'package:agrix/features/users/home/widgets/custom_navbar.dart';
@@ -84,7 +84,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
-      pages: [HomeContent(), Favorites(), CartPage(), ProfileScreen()],
+      pages: [HomeContent(), Favorites(), CartScreen(), ProfileScreen()],
     );
   }
 }
