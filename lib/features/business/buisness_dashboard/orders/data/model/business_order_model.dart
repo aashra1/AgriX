@@ -278,8 +278,8 @@ class BusinessOrderApiModel {
 
   PaymentStatus _parsePaymentStatus(String value) {
     switch (value.toLowerCase()) {
-      case 'paid':
-        return PaymentStatus.paid;
+      case 'completed':
+        return PaymentStatus.completed;
       case 'failed':
         return PaymentStatus.failed;
       case 'pending':
