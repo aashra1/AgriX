@@ -1,6 +1,7 @@
 import 'package:agrix/app/theme/app_colors.dart';
 import 'package:agrix/features/category/domain/entity/category_entity.dart';
 import 'package:agrix/features/category/presentation/state/category_state.dart';
+import 'package:agrix/features/category/presentation/view/category_detail_page.dart';
 import 'package:agrix/features/category/presentation/viewmodel/category_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,6 @@ class _CategoriesGridState extends ConsumerState<CategoriesGrid> {
   @override
   void initState() {
     super.initState();
-    // Use WidgetsBinding to delay the call until after the build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCategories();
     });
@@ -31,24 +31,20 @@ class _CategoriesGridState extends ConsumerState<CategoriesGrid> {
   Widget build(BuildContext context) {
     final categoryState = ref.watch(categoryViewModelProvider);
 
-    // Screen dimensions
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Responsive sizing
     final double gridPadding = screenWidth * 0.05;
     final double iconSize = screenWidth * 0.08;
     final double spacing = screenWidth * 0.03;
     final double fontSize = screenWidth * 0.035;
 
-    // Handle loading state
     if (categoryState.status == CategoryStatus.loading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryGreen),
       );
     }
 
-    // Handle error state
     if (categoryState.status == CategoryStatus.error) {
       return Center(
         child: Column(
@@ -70,10 +66,8 @@ class _CategoriesGridState extends ConsumerState<CategoriesGrid> {
       );
     }
 
-    // Get categories from state
     final categories = categoryState.categories;
 
-    // Show empty state if no categories
     if (categories.isEmpty) {
       return Center(
         child: Text(
@@ -97,7 +91,18 @@ class _CategoriesGridState extends ConsumerState<CategoriesGrid> {
         ),
         itemBuilder: (context, index) {
           final category = categories[index];
-          return _buildCategoryItem(category, iconSize, spacing, fontSize);
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => CategoryDetailScreen(category: category),
+                ),
+              );
+            },
+            child: _buildCategoryItem(category, iconSize, spacing, fontSize),
+          );
         },
       ),
     );
