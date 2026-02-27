@@ -3,6 +3,7 @@ import 'package:agrix/features/business/auth/data/models/business_auth_hive_mode
 import 'package:agrix/features/business/buisness_dashboard/orders/data/model/business_order_hive_model.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/data/model/business_product_hive_model.dart';
 import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/users/product/data/model/user_product_hive_model.dart';
 import 'package:agrix/features/users/profile/data/model/profile_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -319,5 +320,50 @@ class HiveService {
     for (final id in ordersToDelete) {
       await _businessOrderBox.delete(id);
     }
+  }
+
+  Box<UserProductHiveModel> get _userProductBox =>
+      Hive.box<UserProductHiveModel>(HiveTableConstant.userProductTable);
+
+  Future<void> addUserProduct(UserProductHiveModel product) async {
+    await _userProductBox.put(product.productId, product);
+  }
+
+  List<UserProductHiveModel> getAllUserProducts() {
+    try {
+      return _userProductBox.values.toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  List<UserProductHiveModel> getUserProductsByCategory(String categoryId) {
+    try {
+      return _userProductBox.values
+          .where((product) => product.categoryId == categoryId)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  UserProductHiveModel? getUserProductById(String productId) {
+    try {
+      return _userProductBox.get(productId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateUserProduct(UserProductHiveModel product) async {
+    await _userProductBox.put(product.productId, product);
+  }
+
+  Future<void> deleteUserProduct(String productId) async {
+    await _userProductBox.delete(productId);
+  }
+
+  Future<void> clearAllUserProducts() async {
+    await _userProductBox.clear();
   }
 }
