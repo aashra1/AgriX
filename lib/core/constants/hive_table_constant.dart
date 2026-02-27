@@ -1,14 +1,25 @@
 class HiveTableConstant {
-  // Private constructor
   HiveTableConstant._();
 
-  // Database name
-  static const String dbName = "agrix";
+  static const String dbName = 'agrix_db';
 
-  // Tables -> Box : Index
+  // Auth tables
+  static const String authTable = 'auth';
   static const int authTypeId = 0;
-  static const String authTable = "auth_table";
 
-  static const String businessAuthTable = 'business_auth_table';
+  // Business Auth tables
+  static const String businessAuthTable = 'businessAuth';
   static const int businessAuthTypeId = 1;
+
+  // Product tables
+  static const String productTable = 'products';
+  static const int productTypeId = 2;
+
+  // Business Order tables
+  static const String businessOrderTable = 'businessOrders';
+  static const int businessOrderTypeId = 3;
+
+  // User Profile tables
+  static const String userProfileTable = 'userProfile';
+  static const int userProfileTypeId = 4;
 }
