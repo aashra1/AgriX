@@ -33,7 +33,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
     final List<Map<String, String>> navItems = [
       {'icon': 'assets/icons/home.png', 'label': 'Home'},
-      {'icon': 'assets/icons/favorite.png', 'label': 'Favorites'},
+      {'icon': 'assets/icons/file.png', 'label': 'Orders'},
       {'icon': 'assets/icons/shopping-cart-2.png', 'label': 'Cart'},
       {'icon': 'assets/icons/user.png', 'label': 'Profile'},
     ];

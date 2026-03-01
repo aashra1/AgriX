@@ -1,4 +1,3 @@
-// lib/features/business/business_dashboard/order/domain/entity/business_order_entity.dart
 import 'package:equatable/equatable.dart';
 
 enum OrderStatus { pending, processing, shipped, delivered, cancelled }

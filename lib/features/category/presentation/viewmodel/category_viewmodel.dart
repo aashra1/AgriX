@@ -1,6 +1,6 @@
 import 'package:agrix/features/category/domain/entity/category_entity.dart';
 import 'package:agrix/features/category/presentation/state/category_state.dart';
-import 'package:agrix/features/category/presentation/usecase/category_usecases.dart';
+import 'package:agrix/features/category/domain/usecase/category_usecases.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final categoryViewModelProvider =
