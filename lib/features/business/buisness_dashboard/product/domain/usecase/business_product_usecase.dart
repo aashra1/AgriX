@@ -7,7 +7,28 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Add Product Usecase
+final addProductUsecaseProvider = Provider<AddProductUsecase>((ref) {
+  final productRepository = ref.read(productRepositoryProvider);
+  return AddProductUsecase(productRepository: productRepository);
+});
+
+final updateProductUsecaseProvider = Provider<UpdateProductUsecase>((ref) {
+  final productRepository = ref.read(productRepositoryProvider);
+  return UpdateProductUsecase(productRepository: productRepository);
+});
+
+final getBusinessProductsUsecaseProvider = Provider<GetBusinessProductsUsecase>(
+  (ref) {
+    final productRepository = ref.read(productRepositoryProvider);
+    return GetBusinessProductsUsecase(productRepository: productRepository);
+  },
+);
+
+final deleteProductUsecaseProvider = Provider<DeleteProductUsecase>((ref) {
+  final productRepository = ref.read(productRepositoryProvider);
+  return DeleteProductUsecase(productRepository: productRepository);
+});
+
 class AddProductUsecaseParams extends Equatable {
   final String name;
   final String categoryId;
@@ -54,11 +75,6 @@ class AddProductUsecaseParams extends Equatable {
   ];
 }
 
-final addProductUsecaseProvider = Provider<AddProductUsecase>((ref) {
-  final productRepository = ref.read(productRepositoryProvider);
-  return AddProductUsecase(productRepository: productRepository);
-});
-
 class AddProductUsecase
     implements UsecaseWithParams<ProductEntity, AddProductUsecaseParams> {
   final IProductRepository _productRepository;
@@ -85,7 +101,84 @@ class AddProductUsecase
   }
 }
 
-// Get Business Products Usecase
+class UpdateProductUsecaseParams extends Equatable {
+  final String productId;
+  final String? name;
+  final String? categoryId;
+  final double? price;
+  final int? stock;
+  final String? brand;
+  final double? discount;
+  final double? weight;
+  final String? unitType;
+  final String? shortDescription;
+  final String? fullDescription;
+  final String? imagePath;
+  final String token;
+
+  const UpdateProductUsecaseParams({
+    required this.productId,
+    this.name,
+    this.categoryId,
+    this.price,
+    this.stock,
+    this.brand,
+    this.discount,
+    this.weight,
+    this.unitType,
+    this.shortDescription,
+    this.fullDescription,
+    this.imagePath,
+    required this.token,
+  });
+
+  @override
+  List<Object?> get props => [
+    productId,
+    name,
+    categoryId,
+    price,
+    stock,
+    brand,
+    discount,
+    weight,
+    unitType,
+    shortDescription,
+    fullDescription,
+    imagePath,
+    token,
+  ];
+}
+
+class UpdateProductUsecase
+    implements UsecaseWithParams<ProductEntity, UpdateProductUsecaseParams> {
+  final IProductRepository _productRepository;
+
+  UpdateProductUsecase({required IProductRepository productRepository})
+    : _productRepository = productRepository;
+
+  @override
+  Future<Either<Failure, ProductEntity>> call(
+    UpdateProductUsecaseParams params,
+  ) {
+    return _productRepository.updateProduct(
+      productId: params.productId,
+      name: params.name,
+      categoryId: params.categoryId,
+      price: params.price,
+      stock: params.stock,
+      brand: params.brand,
+      discount: params.discount,
+      weight: params.weight,
+      unitType: params.unitType,
+      shortDescription: params.shortDescription,
+      fullDescription: params.fullDescription,
+      imagePath: params.imagePath,
+      token: params.token,
+    );
+  }
+}
+
 class GetBusinessProductsUsecaseParams extends Equatable {
   final String token;
 
@@ -94,13 +187,6 @@ class GetBusinessProductsUsecaseParams extends Equatable {
   @override
   List<Object?> get props => [token];
 }
-
-final getBusinessProductsUsecaseProvider = Provider<GetBusinessProductsUsecase>(
-  (ref) {
-    final productRepository = ref.read(productRepositoryProvider);
-    return GetBusinessProductsUsecase(productRepository: productRepository);
-  },
-);
 
 class GetBusinessProductsUsecase
     implements
@@ -121,7 +207,6 @@ class GetBusinessProductsUsecase
   }
 }
 
-// Delete Product Usecase
 class DeleteProductUsecaseParams extends Equatable {
   final String productId;
   final String token;
@@ -134,11 +219,6 @@ class DeleteProductUsecaseParams extends Equatable {
   @override
   List<Object?> get props => [productId, token];
 }
-
-final deleteProductUsecaseProvider = Provider<DeleteProductUsecase>((ref) {
-  final productRepository = ref.read(productRepositoryProvider);
-  return DeleteProductUsecase(productRepository: productRepository);
-});
 
 class DeleteProductUsecase
     implements UsecaseWithParams<bool, DeleteProductUsecaseParams> {

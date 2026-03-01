@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:agrix/app/theme/app_colors.dart';
 import 'package:agrix/app/theme/app_styles.dart';
+import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/core/utils/snackbar_utils.dart';
-import 'package:agrix/features/business/buisness_dashboard/business_homepage.dart';
+import 'package:agrix/features/business/buisness_dashboard/product/domain/entity/business_product_entity.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/presentation/state/business_product_state.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/presentation/viewmodel/business_product_viewmodel.dart';
 import 'package:agrix/features/category/domain/entity/category_entity.dart';
@@ -13,37 +14,58 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BusinessAddProductScreen extends ConsumerStatefulWidget {
-  const BusinessAddProductScreen({super.key});
+class BusinessEditProductScreen extends ConsumerStatefulWidget {
+  final ProductEntity product;
+
+  const BusinessEditProductScreen({super.key, required this.product});
 
   @override
-  ConsumerState<BusinessAddProductScreen> createState() =>
-      _BusinessAddProductScreenState();
+  ConsumerState<BusinessEditProductScreen> createState() =>
+      _BusinessEditProductScreenState();
 }
 
-class _BusinessAddProductScreenState
-    extends ConsumerState<BusinessAddProductScreen> {
+class _BusinessEditProductScreenState
+    extends ConsumerState<BusinessEditProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final _nameController = TextEditingController();
-  final _brandController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _discountController = TextEditingController(text: '0');
-  final _stockController = TextEditingController();
-  final _weightController = TextEditingController();
-  final _unitTypeController = TextEditingController();
-  final _shortDescriptionController = TextEditingController();
-  final _fullDescriptionController = TextEditingController();
+  late final _nameController = TextEditingController(text: widget.product.name);
+  late final _brandController = TextEditingController(
+    text: widget.product.brand ?? '',
+  );
+  late final _priceController = TextEditingController(
+    text: widget.product.price.toString(),
+  );
+  late final _discountController = TextEditingController(
+    text: widget.product.discount.toString(),
+  );
+  late final _stockController = TextEditingController(
+    text: widget.product.stock.toString(),
+  );
+  late final _weightController = TextEditingController(
+    text: widget.product.weight?.toString() ?? '',
+  );
+  late final _unitTypeController = TextEditingController(
+    text: widget.product.unitType ?? '',
+  );
+  late final _shortDescriptionController = TextEditingController(
+    text: widget.product.shortDescription ?? '',
+  );
+  late final _fullDescriptionController = TextEditingController(
+    text: widget.product.fullDescription ?? '',
+  );
 
   File? _selectedImage;
+  String? _currentImagePath;
   bool _isLoading = false;
   String? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
+    _selectedCategoryId = widget.product.categoryId;
+    _currentImagePath = widget.product.image;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(categoryViewModelProvider.notifier).getCategories();
     });
@@ -67,7 +89,9 @@ class _BusinessAddProductScreenState
   Future<void> _pickImage() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.isNotEmpty) {
-      setState(() => _selectedImage = File(result.files.first.path!));
+      setState(() {
+        _selectedImage = File(result.files.first.path!);
+      });
     }
   }
 
@@ -89,14 +113,6 @@ class _BusinessAddProductScreenState
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      if (_selectedImage == null) {
-        showSnackBar(
-          context: context,
-          message: 'Please add a product image',
-          isSuccess: false,
-        );
-        return;
-      }
       if (_selectedCategoryId == null) {
         showSnackBar(
           context: context,
@@ -121,21 +137,33 @@ class _BusinessAddProductScreenState
 
       await ref
           .read(productViewModelProvider.notifier)
-          .addProduct(
+          .updateProduct(
+            productId: widget.product.id!,
             name: _nameController.text.trim(),
             categoryId: _selectedCategoryId!,
             price: double.parse(_priceController.text.trim()),
             stock: int.parse(_stockController.text.trim()),
-            brand: _brandController.text.trim(),
+            brand:
+                _brandController.text.trim().isEmpty
+                    ? null
+                    : _brandController.text.trim(),
             discount: double.tryParse(_discountController.text.trim()),
             weight: double.tryParse(_weightController.text.trim()),
-            unitType: _unitTypeController.text.trim(),
-            shortDescription: _shortDescriptionController.text.trim(),
-            fullDescription: _fullDescriptionController.text.trim(),
-            imagePath: _selectedImage!.path,
+            unitType:
+                _unitTypeController.text.trim().isEmpty
+                    ? null
+                    : _unitTypeController.text.trim(),
+            shortDescription:
+                _shortDescriptionController.text.trim().isEmpty
+                    ? null
+                    : _shortDescriptionController.text.trim(),
+            fullDescription:
+                _fullDescriptionController.text.trim().isEmpty
+                    ? null
+                    : _fullDescriptionController.text.trim(),
+            imagePath: _selectedImage?.path,
             token: token,
           );
-      setState(() => _isLoading = false);
     }
   }
 
@@ -145,15 +173,19 @@ class _BusinessAddProductScreenState
     final categoryState = ref.watch(categoryViewModelProvider);
 
     ref.listen<ProductState>(productViewModelProvider, (previous, next) {
-      if (next.status == ProductStatus.added) {
+      if (next.status == ProductStatus.updated) {
         showSnackBar(
           context: context,
-          message: 'Product added successfully!',
+          message: 'Product updated successfully!',
           isSuccess: true,
         );
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const BusinessHomeScreen()),
-          (route) => false,
+        Navigator.of(context).pop(true);
+      } else if (next.status == ProductStatus.error) {
+        setState(() => _isLoading = false);
+        showSnackBar(
+          context: context,
+          message: next.errorMessage ?? 'Failed to update product',
+          isSuccess: false,
         );
       }
     });
@@ -186,7 +218,7 @@ class _BusinessAddProductScreenState
           ),
         ),
         title: Text(
-          'Add New Product',
+          'Edit Product',
           style: AppStyles.bodyLarge.copyWith(fontSize: 18),
         ),
         centerTitle: true,
@@ -237,22 +269,26 @@ class _BusinessAddProductScreenState
   }
 
   Widget _stepperCircle({required bool isActive, required String label}) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryGreen : AppColors.backgroundGrey,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.white : AppColors.textGrey,
-            fontWeight: FontWeight.bold,
+    return Column(
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.primaryGreen : AppColors.backgroundGrey,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : AppColors.textGrey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -264,11 +300,11 @@ class _BusinessAddProductScreenState
         children: [
           const SizedBox(height: 20),
           Text(
-            "Product Overview",
+            "Basic Information",
             style: AppStyles.headline1.copyWith(fontSize: 22),
           ),
           Text(
-            "Start by adding an image and basic info",
+            "Let's update the core details of your product",
             style: AppStyles.bodyMedium.copyWith(color: AppColors.textGrey),
           ),
           const SizedBox(height: 25),
@@ -284,37 +320,17 @@ class _BusinessAddProductScreenState
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.backgroundGrey),
               ),
-              child:
-                  _selectedImage == null
-                      ? const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_a_photo_outlined,
-                            size: 40,
-                            color: AppColors.iconGrey,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Tap to upload",
-                            style: TextStyle(color: AppColors.textGrey),
-                          ),
-                        ],
-                      )
-                      : ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                      ),
+              child: _buildImagePreview(),
             ),
           ),
           const SizedBox(height: 25),
-          _sectionHeader("Identification"),
+          _sectionHeader("Identity & Pricing"),
           _inputLabel("Product Name"),
-          _textField(_nameController, "e.g. Fresh Tomatoes", isRequired: true),
+          _textField(_nameController, "e.g. Organic Apple", isRequired: true),
           _inputLabel("Category"),
           _dropdownField(categories),
           _inputLabel("Brand (Optional)"),
-          _textField(_brandController, "e.g. Local Farms"),
+          _textField(_brandController, "e.g. AgriFarm"),
           Row(
             children: [
               Expanded(
@@ -370,6 +386,47 @@ class _BusinessAddProductScreenState
     );
   }
 
+  Widget _buildImagePreview() {
+    if (_selectedImage != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Image.file(_selectedImage!, fit: BoxFit.cover),
+      );
+    } else if (_currentImagePath != null) {
+      final fileName = _currentImagePath!.split('/').last;
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              "${ApiEndpoints.baseIp}/uploads/product-images/$fileName",
+              fit: BoxFit.cover,
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.camera_alt_outlined,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return const Icon(
+      Icons.add_a_photo_outlined,
+      size: 40,
+      color: AppColors.iconGrey,
+    );
+  }
+
   Widget _buildSecondPage(double w) {
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: w * 0.06),
@@ -377,11 +434,11 @@ class _BusinessAddProductScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          _sectionHeader("Inventory Details"),
-          _inputLabel("Initial Stock"),
+          _sectionHeader("Inventory & Logistics"),
+          _inputLabel("Available Stock"),
           _textField(
             _stockController,
-            "Amount available",
+            "Quantity in hand",
             keyboardType: TextInputType.number,
             isRequired: true,
           ),
@@ -405,7 +462,7 @@ class _BusinessAddProductScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _inputLabel("Unit Type"),
+                    _inputLabel("Unit"),
                     _textField(_unitTypeController, "e.g. kg, ltr"),
                   ],
                 ),
@@ -413,13 +470,13 @@ class _BusinessAddProductScreenState
             ],
           ),
           const SizedBox(height: 25),
-          _sectionHeader("Description"),
+          _sectionHeader("Descriptions"),
           _inputLabel("Short Tagline"),
-          _textField(_shortDescriptionController, "Brief catchy summary..."),
-          _inputLabel("Full Details"),
+          _textField(_shortDescriptionController, "Brief catchphrase..."),
+          _inputLabel("Full Description"),
           _textField(
             _fullDescriptionController,
-            "Detailed product info...",
+            "Detailed specifications...",
             maxLines: 5,
           ),
           const SizedBox(height: 40),
@@ -460,7 +517,7 @@ class _BusinessAddProductScreenState
                             ),
                           )
                           : Text(
-                            "Add Product",
+                            "Update Product",
                             style: AppStyles.buttonText.copyWith(
                               color: Colors.white,
                             ),

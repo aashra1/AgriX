@@ -1,6 +1,7 @@
+import 'package:agrix/app/theme/app_colors.dart';
+import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/presentation/pages/business_add_product.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class BusinessHeaderSection extends StatelessWidget {
   const BusinessHeaderSection({super.key});
@@ -30,42 +31,37 @@ class BusinessHeaderSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// TOP ROW
               Row(
                 children: [
-                  Image.asset(
-                    "assets/icons/address.png",
-                    width: w * 0.06,
-                    height: w * 0.06,
-                    color: Colors.black87,
-                  ),
-                  SizedBox(width: w * 0.02),
+                  // Removed the menu icon GestureDetector
+
+                  // Keep location info
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Your location",
-                        style: GoogleFonts.crimsonPro(
-                          color: Colors.black,
-                          fontSize: w * 0.04,
+                        style: AppStyles.caption.copyWith(
+                          color: AppColors.textBlack,
                         ),
                       ),
                       Text(
                         "Bouddha, Kathmandu",
-                        style: GoogleFonts.crimsonPro(
-                          color: const Color(0xFF1B5E20),
-                          fontWeight: FontWeight.w500,
-                          fontSize: w * 0.045,
+                        style: AppStyles.bodyMedium.copyWith(
+                          color: AppColors.secondaryGreen,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                   const Spacer(),
+
+                  // Keep notification bell and profile
                   Image.asset(
                     "assets/icons/bell.png",
                     width: w * 0.06,
                     height: w * 0.06,
-                    color: Colors.black87,
+                    color: AppColors.textBlack,
                   ),
                   SizedBox(width: w * 0.04),
                   CircleAvatar(
@@ -76,23 +72,23 @@ class BusinessHeaderSection extends StatelessWidget {
                   ),
                 ],
               ),
-
               SizedBox(height: h * 0.03),
 
-              /// SEARCH BAR
+              // Search field
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.backgroundWhite,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
                   ],
                 ),
                 child: TextField(
+                  style: AppStyles.bodyMedium,
                   decoration: InputDecoration(
                     prefixIcon: Padding(
                       padding: EdgeInsets.all(w * 0.03),
@@ -103,33 +99,29 @@ class BusinessHeaderSection extends StatelessWidget {
                       ),
                     ),
                     hintText: "Search for a product",
-                    hintStyle: GoogleFonts.crimsonPro(
-                      color: const Color(0xFF7B7979),
-                      fontSize: w * 0.04,
+                    hintStyle: AppStyles.inputField.copyWith(
+                      color: AppColors.textGrey,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: h * 0.02),
                   ),
                 ),
               ),
-
               SizedBox(height: h * 0.02),
 
-              /// TAGLINE
+              // Tagline
               Text(
                 "SHOP . TAP . GROW",
-                style: GoogleFonts.crimsonPro(
-                  color: const Color(0xFF0B3D0B),
-                  fontSize: w * 0.05,
-                  fontWeight: FontWeight.w600,
+                style: AppStyles.bodyLarge.copyWith(
+                  color: AppColors.primaryGreen,
+                  letterSpacing: 1.5,
                 ),
               ),
-
               SizedBox(height: h * 0.03),
 
-              /// BUTTON AREA
+              // Add Products button
               SizedBox(
-                height: h * 0.25,
+                height: h * 0.15,
                 child: Stack(
                   children: [
                     Positioned(
@@ -137,31 +129,29 @@ class BusinessHeaderSection extends StatelessWidget {
                       left: 0,
                       child: SizedBox(
                         width: w * 0.42,
-                        height: h * 0.065,
+                        height: h * 0.06,
                         child: ElevatedButton(
                           onPressed: () {
-                            // This clears the stack and sets the Homepage as the new root
-                            Navigator.of(context).pushAndRemoveUntil(
+                            Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder:
                                     (context) =>
                                         const BusinessAddProductScreen(),
                               ),
-                              (route) => false,
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFDE7C),
-                            foregroundColor: const Color(0xff0B3D0B),
+                            backgroundColor: AppColors.primaryYellow,
+                            foregroundColor: AppColors.primaryGreen,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
                           child: Text(
                             "Add Products",
-                            style: GoogleFonts.crimsonPro(
-                              fontSize: w * 0.045,
-                              fontWeight: FontWeight.w500,
+                            style: AppStyles.buttonText.copyWith(
+                              fontSize: w * 0.04,
                             ),
                           ),
                         ),

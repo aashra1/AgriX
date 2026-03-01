@@ -55,7 +55,7 @@ void main() {
       categoryId: '1',
     );
 
-    final tProductEntity = tProductApiModel.toProductEntity();
+ 
 
     final tProductHiveModel = ProductHiveModel(
       productId: 'temp_${DateTime.now().millisecondsSinceEpoch}',
@@ -70,16 +70,13 @@ void main() {
     );
 
     test('getBusinessProducts should return local data when offline', () async {
-      // Arrange
       when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
       when(
         () => mockLocalDataSource.getBusinessProducts(any()),
       ).thenAnswer((_) async => [tProductHiveModel]);
 
-      // Act
       final result = await repository.getBusinessProducts(token: tToken);
 
-      // Assert
       expect(result.isRight(), true);
       verify(() => mockLocalDataSource.getBusinessProducts(any())).called(1);
       verifyZeroInteractions(mockRemoteDataSource);
@@ -88,7 +85,6 @@ void main() {
     test(
       'addProduct should return ApiFailure when online but API call fails',
       () async {
-        // Arrange
         when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => true);
         when(
           () => mockRemoteDataSource.addProduct(
@@ -98,7 +94,6 @@ void main() {
           ),
         ).thenThrow(Exception('API Error'));
 
-        // Act
         final result = await repository.addProduct(
           name: 'Organic Fertilizer',
           categoryId: '1',
@@ -107,7 +102,6 @@ void main() {
           token: tToken,
         );
 
-        // Assert
         expect(result.isLeft(), true);
       },
     );
@@ -115,13 +109,11 @@ void main() {
     test(
       'addProduct should return LocalDatabaseFailure when offline and local save fails',
       () async {
-        // Arrange
         when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
         when(
           () => mockLocalDataSource.addProduct(any()),
         ).thenThrow(Exception('Hive Error'));
 
-        // Act
         final result = await repository.addProduct(
           name: 'Organic Fertilizer',
           categoryId: '1',
@@ -130,7 +122,6 @@ void main() {
           token: tToken,
         );
 
-        // Assert
         expect(result.isLeft(), true);
       },
     );

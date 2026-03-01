@@ -1,16 +1,9 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  // Base URL - change this for production
-  // static const String baseUrl = 'http://192.168.68.106:5001/api';
-  static const String baseIp = 'http://192.168.68.127:5001';
+  // Base URL
+  static const String baseIp = 'http://192.168.1.93:5001';
   static const String baseUrl = '$baseIp/api';
-
-  //static const String baseUrl = 'http://localhost:3000/api/v1';
-
-  // For Android Emulator use: 'http://10.0.2.2:3000/api/v1'
-  // For iOS Simulator use: 'http://localhost:5000/api/v1'
-  // For Physical Device use your computer's IP: 'http://192.168.x.x:5000/api/v1'
 
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
@@ -18,24 +11,19 @@ class ApiEndpoints {
   static const String users = '/user';
   static const String userLogin = '/user/login';
   static const String userRegister = '/user/register';
-
-  // Dynamic endpoints with parameters
   static String userById(String id) => '/user/$id';
   static String editUserProfile(String id) => '/user/$id';
   static String deleteUserAccount(String id) => '/user/$id';
 
-  // ============ Business Endpoints =============
   static const String business = '/business';
   static const String businessRegister = '/business/register';
   static const String businessLogin = '/business/login';
   static const String businessUploadDocument = '/business/upload-document';
   static const String businessAdminApprove = '/business/admin/approve';
   static const String businessAdminAll = '/business/admin/all';
-
   static String businessApproveById(String businessId) =>
       '/business/admin/approve/$businessId';
 
-  // ============ Category Endpoints =============
   static const String categories = '/categories';
   static String categoryById(String id) => '/categories/$id';
 
@@ -44,7 +32,33 @@ class ApiEndpoints {
   static String productById(String id) => '/product/$id';
   static const String imageUrl = '$baseIp/uploads/product-images';
 
-  // ============ Dashboard Endpoints =============
+  static const String cart = '/cart';
+  static const String addToCart = '/cart/add';
+  static const String clearCart = '/cart/clear';
+  static const String cartCount = '/cart/count';
+  static String updateCartItem(String productId) => '/cart/item/$productId';
+  static String removeFromCart(String productId) => '/cart/item/$productId';
+
+  static const String orders = '/order';
+  static const String userOrders = '/order/user';
+  static const String businessOrders = '/order/business/orders';
+  static String orderById(String orderId) => '/order/$orderId';
+  static String updateOrderStatus(String orderId) => '/order/$orderId/status';
+  static String updatePaymentStatus(String orderId) =>
+      '/order/$orderId/payment';
+
+  static const String initiateKhalti = '/payments/khalti/initiate';
+  static const String verifyKhalti = '/payments/khalti/verify';
+  static const String userPayments = '/payments/user';
+  static const String allPaymentsAdmin = '/payments/admin/all';
+  static String paymentByOrderId(String orderId) => '/payments/order/$orderId';
+
+  static const String walletBalance = '/wallets/balance';
+  static const String walletTransactions = '/wallets/transactions';
+  static const String businessWalletBalance = '/wallets/business/balance';
+  static const String businessWalletTransactions =
+      '/wallets/business/transactions';
+
   static const String dashboard = '/dashboard';
   static const String dashboardStats = '/dashboard/stats';
   static const String dashboardAnalytics = '/dashboard/analytics';
