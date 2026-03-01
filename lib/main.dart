@@ -1,23 +1,11 @@
-
-import 'package:agrix/features/onboarding/Splash_screen1.dart';
+import 'package:agrix/app/app.dart';
+import 'package:agrix/core/services/hive/hive_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Agrix',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const SplashScreen1(),
-    );
-  }
+  await HiveService().init();
+  runApp(ProviderScope(child: MyApp()));
 }
