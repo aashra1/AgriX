@@ -3,6 +3,7 @@ import 'package:agrix/features/business/auth/data/models/business_auth_hive_mode
 import 'package:agrix/features/business/buisness_dashboard/orders/data/model/business_order_hive_model.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/data/model/business_product_hive_model.dart';
 import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/users/profile/data/model/profile_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,6 +32,11 @@ class HiveService {
     if (!Hive.isAdapterRegistered(HiveTableConstant.businessAuthTypeId)) {
       Hive.registerAdapter(BusinessAuthHiveModelAdapter());
     }
+
+    // Register user profile adapter
+    if (!Hive.isAdapterRegistered(HiveTableConstant.userProfileTypeId)) {
+      Hive.registerAdapter(UserProfileHiveModelAdapter());
+    }
   }
 
   // box open
@@ -38,6 +44,13 @@ class HiveService {
     await Hive.openBox<AuthHiveModel>(HiveTableConstant.authTable);
     await Hive.openBox<BusinessAuthHiveModel>(
       HiveTableConstant.businessAuthTable,
+    );
+    await Hive.openBox<UserProfileHiveModel>(
+      HiveTableConstant.userProfileTable,
+    );
+    await Hive.openBox<ProductHiveModel>(HiveTableConstant.productTable);
+    await Hive.openBox<BusinessOrderHiveModel>(
+      HiveTableConstant.businessOrderTable,
     );
   }
 
@@ -67,6 +80,8 @@ class HiveService {
       return null;
     }
   }
+
+  // ======================= Business Auth Queries =========================
 
   Box<BusinessAuthHiveModel> get _businessAuthBox =>
       Hive.box<BusinessAuthHiveModel>(HiveTableConstant.businessAuthTable);
@@ -191,8 +206,39 @@ class HiveService {
     }
   }
 
+  // ======================= User Profile Queries =========================
+
+  Box<UserProfileHiveModel> get _userProfileBox =>
+      Hive.box<UserProfileHiveModel>(HiveTableConstant.userProfileTable);
+
+  Future<void> saveUserProfile(UserProfileHiveModel profile) async {
+    await _userProfileBox.put('currentUser', profile);
+  }
+
+  Future<UserProfileHiveModel?> getUserProfile() async {
+    try {
+      return _userProfileBox.get('currentUser');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateUserProfile(UserProfileHiveModel profile) async {
+    await _userProfileBox.put('currentUser', profile);
+  }
+
+  Future<void> deleteUserProfile() async {
+    await _userProfileBox.delete('currentUser');
+  }
+
+  Future<void> clearUserProfiles() async {
+    await _userProfileBox.clear();
+  }
+
+  // ======================= Product Queries =========================
+
   Box<ProductHiveModel> get _productBox =>
-      Hive.box<ProductHiveModel>('products');
+      Hive.box<ProductHiveModel>(HiveTableConstant.productTable);
 
   Future<void> addProduct(ProductHiveModel product) async {
     await _productBox.put(product.productId, product);
@@ -231,50 +277,47 @@ class HiveService {
     }
   }
 
-  // order
-  // Add to lib/core/services/hive/hive_service.dart
+  // ======================= Business Order Queries =========================
+
+  Box<BusinessOrderHiveModel> get _businessOrderBox =>
+      Hive.box<BusinessOrderHiveModel>(HiveTableConstant.businessOrderTable);
 
   Future<void> addBusinessOrder(BusinessOrderHiveModel order) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
-    await box.put(order.id, order);
+    await _businessOrderBox.put(order.id, order);
   }
 
   Future<List<BusinessOrderHiveModel>> getBusinessOrders(
     String businessId,
   ) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
-    return box.values.where((order) {
+    return _businessOrderBox.values.where((order) {
       return order.items.any((item) => item.businessId == businessId);
     }).toList();
   }
 
   Future<BusinessOrderHiveModel?> getBusinessOrderById(String orderId) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
-    return box.get(orderId);
+    return _businessOrderBox.get(orderId);
   }
 
   Future<void> updateBusinessOrder(BusinessOrderHiveModel order) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
-    await box.put(order.id, order);
+    await _businessOrderBox.put(order.id, order);
   }
 
   Future<void> deleteBusinessOrder(String orderId) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
-    await box.delete(orderId);
+    await _businessOrderBox.delete(orderId);
   }
 
   Future<void> clearBusinessOrders(String businessId) async {
-    final box = await Hive.openBox<BusinessOrderHiveModel>('businessOrders');
     final ordersToDelete =
-        box.values
-            .where((order) {
-              return order.items.any((item) => item.businessId == businessId);
-            })
+        _businessOrderBox.values
+            .where(
+              (order) =>
+                  order.items.any((item) => item.businessId == businessId),
+            )
             .map((order) => order.id)
             .toList();
 
     for (final id in ordersToDelete) {
-      await box.delete(id);
+      await _businessOrderBox.delete(id);
     }
   }
 }

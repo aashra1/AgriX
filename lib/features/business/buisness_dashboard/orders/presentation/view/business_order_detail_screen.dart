@@ -54,6 +54,32 @@ class _BusinessOrderDetailScreenState
         .getOrderById(orderId: widget.orderId, token: token);
   }
 
+  Future<void> _refreshOrder() async {
+    await _loadOrderDetails();
+  }
+
+  String _getPaymentStatusDisplay(PaymentStatus status) {
+    switch (status) {
+      case PaymentStatus.completed:
+        return 'COMPLETED';
+      case PaymentStatus.failed:
+        return 'FAILED';
+      case PaymentStatus.pending:
+        return 'PENDING';
+    }
+  }
+
+  Color _getPaymentStatusColor(PaymentStatus status) {
+    switch (status) {
+      case PaymentStatus.completed:
+        return Colors.green;
+      case PaymentStatus.failed:
+        return Colors.red;
+      case PaymentStatus.pending:
+        return Colors.orange;
+    }
+  }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'delivered':
@@ -68,18 +94,6 @@ class _BusinessOrderDetailScreenState
         return Colors.red;
       default:
         return Colors.grey;
-    }
-  }
-
-  Color _getPaymentStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'paid':
-        return Colors.green;
-      case 'failed':
-        return Colors.red;
-      case 'pending':
-      default:
-        return Colors.orange;
     }
   }
 
@@ -200,6 +214,12 @@ class _BusinessOrderDetailScreenState
           icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: AppColors.primaryGreen),
+            onPressed: _refreshOrder,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -267,7 +287,6 @@ class _BusinessOrderDetailScreenState
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
           const SizedBox(height: 12),
-          // Tracking Number Field (shown for shipped status)
           if (_selectedStatus == 'shipped')
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -311,9 +330,22 @@ class _BusinessOrderDetailScreenState
                       ].map((s) {
                         return DropdownMenuItem(
                           value: s,
-                          child: Text(
-                            s.toUpperCase(),
-                            style: const TextStyle(fontSize: 12),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _getStatusColor(s),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                s.toUpperCase(),
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
                           ),
                         );
                       }).toList(),
@@ -625,7 +657,9 @@ class _BusinessOrderDetailScreenState
   }
 
   Widget _buildPaymentCard(BusinessOrderEntity order) {
-    final paymentStatus = order.paymentStatus.toString().split('.').last;
+    final paymentStatus = order.paymentStatus;
+    final statusDisplay = _getPaymentStatusDisplay(paymentStatus);
+    final statusColor = _getPaymentStatusColor(paymentStatus);
 
     return Card(
       elevation: 0,
@@ -635,55 +669,157 @@ class _BusinessOrderDetailScreenState
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Method: ${order.paymentMethod.toString().split('.').last.toUpperCase()}",
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  "Payment Information",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Row(
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: statusColor,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusDisplay,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Method",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            order.paymentMethod == PaymentMethod.cod
+                                ? Icons.money
+                                : order.paymentMethod == PaymentMethod.khalti
+                                ? Icons.bolt
+                                : Icons.credit_card,
+                            size: 16,
+                            color: AppColors.primaryGreen,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            order.paymentMethod
+                                .toString()
+                                .split('.')
+                                .last
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Amount",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatCurrency(order.total),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (order.trackingNumber != null &&
+                order.trackingNumber!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _getPaymentStatusColor(paymentStatus),
+                    Text(
+                      "Tracking Number",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "Status: ${paymentStatus.toUpperCase()}",
-                      style: TextStyle(
-                        color: _getPaymentStatusColor(paymentStatus),
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        order.trackingNumber!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                if (order.trackingNumber != null &&
-                    order.trackingNumber!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      "Tracking: ${order.trackingNumber}",
-                      style: const TextStyle(fontSize: 12, color: Colors.blue),
-                    ),
-                  ),
-              ],
-            ),
-            Icon(
-              order.paymentMethod == PaymentMethod.cod
-                  ? Icons.money
-                  : Icons.credit_card,
-              color: AppColors.primaryGreen,
-              size: 30,
-            ),
+              ),
           ],
         ),
       ),
@@ -723,8 +859,6 @@ class _BusinessOrderDetailScreenState
       ),
     );
   }
-
-  // --- Small Reusable Widgets ---
 
   Widget _buildSectionHeader(IconData icon, String title) {
     return Padding(
@@ -769,16 +903,18 @@ class _BusinessOrderDetailScreenState
   }
 
   Widget _statusBadge(String status) {
+    final color = _getStatusColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getStatusColor(status),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
         status.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: color,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),

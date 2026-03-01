@@ -284,8 +284,8 @@ class BusinessOrderHiveModel {
 
   static String _paymentStatusToString(PaymentStatus status) {
     switch (status) {
-      case PaymentStatus.paid:
-        return 'paid';
+      case PaymentStatus.completed:
+        return 'completed';
       case PaymentStatus.failed:
         return 'failed';
       case PaymentStatus.pending:
@@ -324,8 +324,8 @@ class BusinessOrderHiveModel {
 
   static PaymentStatus _parsePaymentStatus(String value) {
     switch (value.toLowerCase()) {
-      case 'paid':
-        return PaymentStatus.paid;
+      case 'completed':
+        return PaymentStatus.completed;
       case 'failed':
         return PaymentStatus.failed;
       case 'pending':

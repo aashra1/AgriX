@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 
 enum OrderStatus { pending, processing, shipped, delivered, cancelled }
 
-enum PaymentStatus { pending, paid, failed }
+enum PaymentStatus { pending, completed, failed }
 
 enum PaymentMethod { cod, card, esewa, khalti }
 

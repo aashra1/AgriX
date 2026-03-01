@@ -1,7 +1,6 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  // Base URL
   static const String baseIp = 'http://192.168.1.93:5001';
   static const String baseUrl = '$baseIp/api';
 
@@ -11,9 +10,15 @@ class ApiEndpoints {
   static const String users = '/user';
   static const String userLogin = '/user/login';
   static const String userRegister = '/user/register';
+  static const String userProfile = '/user/profile';
+  static const String editUserProfile = '/user/profile';
+  static const String changePassword = '/user/change-password';
+  static const String requestPasswordReset = '/user/request-password-reset';
+  static String resetPassword(String token) => '/user/reset-password/$token';
   static String userById(String id) => '/user/$id';
-  static String editUserProfile(String id) => '/user/$id';
+  static String editUserById(String id) => '/user/$id';
   static String deleteUserAccount(String id) => '/user/$id';
+  static const String getAllUsers = '/user';
 
   static const String business = '/business';
   static const String businessRegister = '/business/register';
@@ -21,6 +26,8 @@ class ApiEndpoints {
   static const String businessUploadDocument = '/business/upload-document';
   static const String businessAdminApprove = '/business/admin/approve';
   static const String businessAdminAll = '/business/admin/all';
+  static const String businessProfile = '/business/profile';
+  static const String editBusinessProfile = '/business/profile/edit';
   static String businessApproveById(String businessId) =>
       '/business/admin/approve/$businessId';
 

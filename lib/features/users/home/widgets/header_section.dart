@@ -1,8 +1,77 @@
+import 'package:agrix/app/theme/app_colors.dart';
+import 'package:agrix/core/api/api_endpoints.dart';
+import 'package:agrix/core/services/storage/user_session_service.dart';
+import 'package:agrix/features/users/profile/domain/entity/profile_entity.dart';
+import 'package:agrix/features/users/profile/presentation/viewmodel/profile_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HeaderSection extends StatelessWidget {
+class HeaderSection extends ConsumerStatefulWidget {
   const HeaderSection({super.key});
+
+  @override
+  ConsumerState<HeaderSection> createState() => _HeaderSectionState();
+}
+
+class _HeaderSectionState extends ConsumerState<HeaderSection> {
+  String _location = "Bouddha, Kathmandu";
+  String _profileImageUrl = "";
+  String _userName = "";
+  bool _isLoading = true;
+  bool _imageError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserProfile();
+    });
+  }
+
+  Future<void> _loadUserProfile() async {
+    final token = await ref.read(userSessionServiceProvider).getToken();
+
+    if (token == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      final profileState = ref.read(userProfileViewModelProvider);
+
+      if (profileState.profile != null) {
+        _updateProfileData(profileState.profile!);
+      } else {
+        await ref
+            .read(userProfileViewModelProvider.notifier)
+            .getUserProfile(token: token);
+
+        final updatedState = ref.read(userProfileViewModelProvider);
+        if (updatedState.profile != null) {
+          _updateProfileData(updatedState.profile!);
+        } else {
+          setState(() => _isLoading = false);
+        }
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _updateProfileData(UserProfileEntity profile) {
+    setState(() {
+      _location = profile.address ?? "Bouddha, Kathmandu";
+      _userName = profile.fullName;
+      if (profile.profilePicture != null &&
+          profile.profilePicture!.isNotEmpty) {
+        final fileName = profile.profilePicture!.split('/').last;
+        _profileImageUrl =
+            "${ApiEndpoints.baseIp}/uploads/profile-images/$fileName";
+      }
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +118,23 @@ class HeaderSection extends StatelessWidget {
                           fontSize: w * 0.04,
                         ),
                       ),
-                      Text(
-                        "Bouddha, Kathmandu",
-                        style: GoogleFonts.crimsonPro(
-                          color: const Color(0xFF1B5E20),
-                          fontWeight: FontWeight.w500,
-                          fontSize: w * 0.045,
-                        ),
-                      ),
+                      _isLoading
+                          ? Container(
+                            width: 120,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          )
+                          : Text(
+                            _location,
+                            style: GoogleFonts.crimsonPro(
+                              color: const Color(0xFF1B5E20),
+                              fontWeight: FontWeight.w500,
+                              fontSize: w * 0.045,
+                            ),
+                          ),
                     ],
                   ),
                   const Spacer(),
@@ -67,12 +145,42 @@ class HeaderSection extends StatelessWidget {
                     color: Colors.black87,
                   ),
                   SizedBox(width: w * 0.04),
-                  CircleAvatar(
-                    radius: w * 0.045,
-                    backgroundImage: const AssetImage(
-                      "assets/images/profile.jpg",
-                    ),
-                  ),
+                  _isLoading
+                      ? Container(
+                        width: w * 0.09,
+                        height: w * 0.09,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                        ),
+                      )
+                      : CircleAvatar(
+                        radius: w * 0.045,
+                        backgroundColor: AppColors.primaryGreen.withOpacity(
+                          0.1,
+                        ),
+                        backgroundImage:
+                            _profileImageUrl.isNotEmpty && !_imageError
+                                ? NetworkImage(_profileImageUrl)
+                                : const AssetImage("assets/images/profile.jpg")
+                                    as ImageProvider,
+                        onBackgroundImageError: (_, __) {
+                          setState(() => _imageError = true);
+                        },
+                        child:
+                            _profileImageUrl.isEmpty || _imageError
+                                ? Text(
+                                  _userName.isNotEmpty
+                                      ? _userName[0].toUpperCase()
+                                      : "U",
+                                  style: TextStyle(
+                                    color: AppColors.primaryGreen,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: w * 0.04,
+                                  ),
+                                )
+                                : null,
+                      ),
                 ],
               ),
 
