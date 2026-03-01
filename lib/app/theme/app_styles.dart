@@ -70,4 +70,18 @@ class AppStyles {
     fontWeight: FontWeight.bold,
     fontSize: 16,
   );
+
+  static TextStyle bodyText1 = GoogleFonts.crimsonPro(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textBlack,
+    height: 1.5,
+  );
+
+  static TextStyle bodyText2 = GoogleFonts.crimsonPro(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textBlack,
+    height: 1.43,
+  );
 }
