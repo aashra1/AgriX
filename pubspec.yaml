@@ -41,6 +41,12 @@ dependencies:
   uuid: ^4.5.2
   dartz: ^0.10.1
   flutter_svg: ^2.2.3
+  dio: ^5.9.0
+  dio_smart_retry: ^7.0.1
+  pretty_dio_logger: ^1.4.0
+  flutter_secure_storage: ^10.0.0
+  connectivity_plus: ^7.0.0
+  shared_preferences: ^2.5.4
 
 
 dev_dependencies:
