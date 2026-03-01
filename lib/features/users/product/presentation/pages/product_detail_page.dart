@@ -5,6 +5,7 @@ import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/core/utils/snackbar_utils.dart';
 import 'package:agrix/features/users/cart/presentation/state/cart_state.dart';
 import 'package:agrix/features/users/cart/presentation/viewmodel/cart_viewmodel.dart';
+import 'package:agrix/features/users/checkout/presentation/view/checkout_screen.dart';
 import 'package:agrix/features/users/product/domain/entity/user_product_entity.dart';
 import 'package:agrix/features/users/product/presentation/state/user_product_state.dart';
 import 'package:agrix/features/users/product/presentation/viewmodel/user_product_viewmodel.dart';
@@ -25,6 +26,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int _quantity = 1;
   bool _isAddingToCart = false;
+  bool _isBuyingNow = false;
 
   @override
   void initState() {
@@ -77,10 +79,41 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     });
   }
 
+  Future<void> _buyNow() async {
+    final token = await ref.read(userSessionServiceProvider).getToken();
+    if (token == null) {
+      _showAuthError();
+      return;
+    }
+
+    final productState = ref.read(userProductViewModelProvider);
+    final product = productState.selectedProduct;
+    if (product == null) return;
+
+    setState(() {
+      _isBuyingNow = true;
+    });
+
+    await ref
+        .read(cartViewModelProvider.notifier)
+        .addToCart(token: token, productId: product.id!, quantity: _quantity);
+
+    setState(() {
+      _isBuyingNow = false;
+    });
+
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CheckoutScreen()),
+      );
+    }
+  }
+
   void _showAuthError() {
     showSnackBar(
       context: context,
-      message: 'Please login to add items to cart',
+      message: 'Please login to continue',
       isSuccess: false,
     );
     Future.delayed(const Duration(seconds: 1), () {
@@ -115,7 +148,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           message: next.errorMessage!,
           isSuccess: false,
         );
-      } else if (next.status == CartStatus.updated) {
+      } else if (next.status == CartStatus.updated && !_isBuyingNow) {
         showSnackBar(
           context: context,
           message: 'Added to cart successfully!',
@@ -136,25 +169,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ? const Center(child: Text("Product not found"))
               : Stack(
                 children: [
-                  // Scrollable Content
                   SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 1. Large Image Header
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.45,
                           width: double.infinity,
                           child: _buildProductImage(product),
                         ),
-
-                        // 2. Details Container
                         Padding(
                           padding: const EdgeInsets.all(24.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Title and Price Row
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -184,8 +212,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 ],
                               ),
                               const SizedBox(height: 20),
-
-                              // Business Name
                               if (product.businessName != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
@@ -215,8 +241,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     ],
                                   ),
                                 ),
-
-                              // Quantity Selector
                               Row(
                                 children: [
                                   Text(
@@ -268,8 +292,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 ],
                               ),
                               const SizedBox(height: 20),
-
-                              // Description Title
                               Text(
                                 "About Product",
                                 style: AppStyles.bodyLarge.copyWith(
@@ -277,8 +299,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-
-                              // Description Body
                               Text(
                                 product.fullDescription ??
                                     product.shortDescription ??
@@ -289,18 +309,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   fontSize: 15,
                                 ),
                               ),
-
-                              const SizedBox(
-                                height: 100,
-                              ), // Space for bottom floating bar
+                              const SizedBox(height: 100),
                             ],
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // 3. Floating Custom Back Button
                   Positioned(
                     top: 50,
                     left: 20,
@@ -309,40 +324,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       onTap: () => Navigator.pop(context),
                     ),
                   ),
-
-                  // 4. Floating Action Bar (Bottom)
                   Positioned(
                     bottom: 30,
                     left: 24,
                     right: 24,
                     child: Row(
                       children: [
-                        // Add to Cart "Pill"
                         _buildAddToCartButton(),
                         const SizedBox(width: 16),
-                        // Buy Now Primary Button
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Buy now logic
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1B3C1B),
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              elevation: 4,
-                            ),
-                            child: Text(
-                              "Buy Now",
-                              style: AppStyles.buttonText.copyWith(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
+                        Expanded(child: _buildBuyNowButton()),
                       ],
                     ),
                   ),
@@ -373,7 +363,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Widget _buildAddToCartButton() {
     return GestureDetector(
-      onTap: _isAddingToCart ? null : _addToCart,
+      onTap: (_isAddingToCart || _isBuyingNow) ? null : _addToCart,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
@@ -410,6 +400,35 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ],
                 ),
       ),
+    );
+  }
+
+  Widget _buildBuyNowButton() {
+    return ElevatedButton(
+      onPressed: (_isAddingToCart || _isBuyingNow) ? null : _buyNow,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF1B3C1B),
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        elevation: 4,
+      ),
+      child:
+          _isBuyingNow
+              ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+              : Text(
+                "Buy Now",
+                style: AppStyles.buttonText.copyWith(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
     );
   }
 
