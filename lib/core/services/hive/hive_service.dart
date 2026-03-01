@@ -3,6 +3,7 @@ import 'package:agrix/features/business/auth/data/models/business_auth_hive_mode
 import 'package:agrix/features/business/buisness_dashboard/orders/data/model/business_order_hive_model.dart';
 import 'package:agrix/features/business/buisness_dashboard/product/data/model/business_product_hive_model.dart';
 import 'package:agrix/features/users/auth/data/models/auth_hive_model.dart';
+import 'package:agrix/features/users/order/data/model/user_order_hive_model.dart';
 import 'package:agrix/features/users/product/data/model/user_product_hive_model.dart';
 import 'package:agrix/features/users/profile/data/model/profile_hive_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -365,5 +366,52 @@ class HiveService {
 
   Future<void> clearAllUserProducts() async {
     await _userProductBox.clear();
+  }
+
+  // ======================= User Order Queries =========================
+
+  Box<UserOrderHiveModel> get _userOrderBox =>
+      Hive.box<UserOrderHiveModel>(HiveTableConstant.userOrderTable);
+
+  Future<void> addUserOrder(UserOrderHiveModel order) async {
+    await _userOrderBox.put(order.id, order);
+  }
+
+  List<UserOrderHiveModel> getUserOrders(String userId) {
+    try {
+      return _userOrderBox.values
+          .where((order) => order.userId == userId)
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  UserOrderHiveModel? getUserOrderById(String orderId) {
+    try {
+      return _userOrderBox.get(orderId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateUserOrder(UserOrderHiveModel order) async {
+    await _userOrderBox.put(order.id, order);
+  }
+
+  Future<void> deleteUserOrder(String orderId) async {
+    await _userOrderBox.delete(orderId);
+  }
+
+  Future<void> clearUserOrders(String userId) async {
+    final ordersToDelete =
+        _userOrderBox.values
+            .where((order) => order.userId == userId)
+            .map((order) => order.id)
+            .toList();
+
+    for (final id in ordersToDelete) {
+      await _userOrderBox.delete(id);
+    }
   }
 }
