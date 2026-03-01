@@ -25,6 +25,8 @@ class UserSessionService {
   static const String _keyUserPhoneNumber = 'user_phone_number';
   static const String _keyUserAddress = 'user_address';
   static const String _keyToken = 'auth_token'; // For secure storage
+  static const String _keyTempToken =
+      'temp_token'; // Add this for temp token storage
 
   UserSessionService({required SharedPreferences prefs}) : _prefs = prefs;
 
@@ -56,12 +58,32 @@ class UserSessionService {
     }
   }
 
-  // Get token from secure storage
+  // Add methods for temp token management
+  Future<void> saveTempToken(String tempToken) async {
+    await _secureStorage.write(key: _keyTempToken, value: tempToken);
+  }
+
+  Future<String?> getTempToken() async {
+    return await _secureStorage.read(key: _keyTempToken);
+  }
+
+  Future<void> clearTempToken() async {
+    await _secureStorage.delete(key: _keyTempToken);
+  }
+
+  // Get token - tries temp token first, then regular token
   Future<String?> getToken() async {
+    // Try temp token first
+    final tempToken = await getTempToken();
+    if (tempToken != null) {
+      return tempToken;
+    }
+
+    // Fall back to regular token
     return await _secureStorage.read(key: _keyToken);
   }
 
-  // Save token separately
+  // Save token (regular auth token)
   Future<void> saveToken(String token) async {
     await _secureStorage.write(key: _keyToken, value: token);
   }
@@ -106,7 +128,8 @@ class UserSessionService {
     await _prefs.remove(_keyUserPhoneNumber);
     await _prefs.remove(_keyUserAddress);
 
-    // Clear secure storage token
+    // Clear secure storage tokens
     await clearToken();
+    await clearTempToken();
   }
 }

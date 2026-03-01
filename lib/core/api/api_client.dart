@@ -140,6 +140,7 @@ class ApiClient {
 class _AuthInterceptor extends Interceptor {
   final _storage = const FlutterSecureStorage();
   static const String _tokenKey = 'auth_token';
+  static const String _tempTokenKey = 'temp_token'; // Add this for temp token
 
   @override
   void onRequest(
@@ -149,7 +150,6 @@ class _AuthInterceptor extends Interceptor {
     final publicEndpoints = [
       ApiEndpoints.userLogin,
       ApiEndpoints.userRegister,
-
       ApiEndpoints.businessLogin,
       ApiEndpoints.businessRegister,
     ];
@@ -165,7 +165,22 @@ class _AuthInterceptor extends Interceptor {
     final isPublicCategoryGet =
         options.method == 'GET' && options.path.startsWith('/categories/');
 
+    // Check if this is a document upload endpoint
+    final isDocumentUpload =
+        options.path == ApiEndpoints.businessUploadDocument;
+
     if (!isPublicEndpoint && !isPublicGet && !isPublicCategoryGet) {
+      // For document upload, try temp token first
+      if (isDocumentUpload) {
+        final tempToken = await _storage.read(key: _tempTokenKey);
+        if (tempToken != null) {
+          options.headers['Authorization'] = 'Bearer $tempToken';
+          handler.next(options);
+          return;
+        }
+      }
+
+      // For other endpoints, use regular auth token
       final token = await _storage.read(key: _tokenKey);
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
@@ -179,8 +194,9 @@ class _AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // Handle 401 Unauthorized - token expired
     if (err.response?.statusCode == 401) {
-      // Clear token and redirect to login
+      // Clear both tokens
       _storage.delete(key: _tokenKey);
+      _storage.delete(key: _tempTokenKey);
       // You can add navigation logic here or use a callback
     }
     handler.next(err);

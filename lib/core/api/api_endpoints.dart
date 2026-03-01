@@ -3,7 +3,8 @@ class ApiEndpoints {
 
   // Base URL - change this for production
   // static const String baseUrl = 'http://192.168.68.106:5001/api';
-  static const String baseUrl = 'http://192.168.1.79:5001/api';
+  static const String baseIp = 'http://192.168.68.127:5001';
+  static const String baseUrl = '$baseIp/api';
 
   //static const String baseUrl = 'http://localhost:3000/api/v1';
 
@@ -38,10 +39,10 @@ class ApiEndpoints {
   static const String categories = '/categories';
   static String categoryById(String id) => '/categories/$id';
 
-  // ============ Product Endpoints =============
-  static const String products = '/products';
-  static const String businessProducts = '/products/business';
-  static String productById(String id) => '/products/$id';
+  static const String products = '/product';
+  static const String businessProducts = '/product/business';
+  static String productById(String id) => '/product/$id';
+  static const String imageUrl = '$baseIp/uploads/product-images';
 
   // ============ Dashboard Endpoints =============
   static const String dashboard = '/dashboard';

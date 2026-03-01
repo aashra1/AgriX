@@ -1,5 +1,4 @@
-
-import 'package:agrix/features/auth/presentation/pages/login_page.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,10 +25,9 @@ class _SplashScreen3State extends State<SplashScreen3> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                /// LOGO
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: w * 0.3, // responsive logo width
+                    maxWidth: w * 0.3,
                   ),
                   child: Image.asset(
                     "assets/images/logo-2.png",
@@ -79,7 +77,7 @@ class _SplashScreen3State extends State<SplashScreen3> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                          builder: (context) => const LoginSelectionScreen(),
                         ),
                       );
                     },
