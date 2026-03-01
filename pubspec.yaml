@@ -53,6 +53,8 @@ dependencies:
   mocktail: ^1.0.4
   test_cov_console: ^0.2.2
   intl: ^0.20.2
+  webview_flutter: ^4.13.1
+  cached_network_image: ^3.4.1
 
 
 dev_dependencies:
