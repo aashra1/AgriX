@@ -171,6 +171,14 @@ class UserPaymentViewModel extends Notifier<UserPaymentState> {
   }
 
   void clearError() {
-    state = state.copyWith(errorMessage: null);
+    state = UserPaymentState(
+      status: state.status,
+      payments: state.payments,
+      currentPayment: state.currentPayment,
+      initiatedPayment: state.initiatedPayment,
+      errorMessage: null,
+      currentPage: state.currentPage,
+      hasReachedMax: state.hasReachedMax,
+    );
   }
 }
