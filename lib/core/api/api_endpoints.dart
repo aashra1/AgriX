@@ -1,7 +1,7 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  static const String baseIp = 'http://192.168.1.93:5001';
+  static const String baseIp = 'http://192.168.68.112:5001';
   static const String baseUrl = '$baseIp/api';
 
   static const Duration connectionTimeout = Duration(seconds: 30);
