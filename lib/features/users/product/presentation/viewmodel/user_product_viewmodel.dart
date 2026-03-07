@@ -168,7 +168,14 @@ class UserProductViewModel extends Notifier<UserProductState> {
   }
 
   void clearSelection() {
-    state = state.copyWith(selectedProduct: null);
+    state = UserProductState(
+      status: state.status,
+      products: state.products,
+      selectedProduct: null,
+      errorMessage: state.errorMessage,
+      currentPage: state.currentPage,
+      hasReachedMax: state.hasReachedMax,
+    );
   }
 
   void clearError() {
