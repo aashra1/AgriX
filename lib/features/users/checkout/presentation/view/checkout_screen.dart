@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:agrix/app/theme/app_colors.dart';
 import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
+import 'package:agrix/core/services/location/ios_location_service.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/core/utils/snackbar_utils.dart';
 import 'package:agrix/features/users/cart/domain/entity/cart_entity.dart';
@@ -50,6 +53,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _postalCodeController = TextEditingController();
 
   PaymentMethod _paymentMethod = PaymentMethod.cod;
+  bool _isFetchingLocation = false;
+  String? _locationInfoText;
+  double? _detectedLatitude;
+  double? _detectedLongitude;
+  double _shippingFee = 0.0;
 
   @override
   void initState() {
@@ -83,6 +91,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cartState = ref.read(cartViewModelProvider);
     if (cartState.cart != null) {
       _setupInitialAddress(cartState.cart!);
+      _refreshShippingForSelectedAddress();
+      if (Platform.isIOS) {
+        await _useCurrentLocationForShipping();
+      }
     }
 
     setState(() => _isLoading = false);
@@ -128,8 +140,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return subtotal * 0.13;
   }
 
-  double _calculateTotal(double subtotal, double tax) {
-    return subtotal + tax;
+  double _calculateTotal(double subtotal, double tax, double shippingFee) {
+    return subtotal + tax + shippingFee;
   }
 
   void _addNewAddress() {
@@ -154,6 +166,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         _showNewAddressForm = false;
       });
 
+      _refreshShippingForSelectedAddress();
+
       _clearAddressForm();
     }
   }
@@ -173,6 +187,176 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       _showNewAddressForm = false;
     });
     _clearAddressForm();
+  }
+
+  Future<void> _useCurrentLocationForShipping() async {
+    if (_isFetchingLocation) return;
+
+    if (!Platform.isIOS) {
+      showSnackBar(
+        context: context,
+        message: 'Current implementation supports iOS location for now.',
+        isSuccess: false,
+      );
+      return;
+    }
+
+    setState(() {
+      _isFetchingLocation = true;
+    });
+
+    try {
+      final location = await IosLocationService.getCurrentLocation();
+      if (!mounted) return;
+      _detectedLatitude = location.latitude;
+      _detectedLongitude = location.longitude;
+
+      final locationLabel = await _buildLocationLabel(
+        latitude: location.latitude,
+        longitude: location.longitude,
+      );
+      if (!mounted) return;
+
+      final parts = locationLabel.split(',').map((e) => e.trim()).toList();
+      final city = parts.isNotEmpty ? parts.first : 'Current Location';
+      final state = parts.length > 1 ? parts[1] : 'GPS';
+
+      if (_showNewAddressForm) {
+        _cityController.text = city;
+        _stateController.text = state;
+        if (_addressLine1Controller.text.trim().isEmpty) {
+          _addressLine1Controller.text = 'Detected from device location';
+        }
+      } else if (_addresses.isNotEmpty) {
+        final current = _addresses[_selectedAddressIndex];
+        _addresses[_selectedAddressIndex] = AddressEntity(
+          fullName: current.fullName,
+          phone: current.phone,
+          addressLine1: current.addressLine1,
+          addressLine2: current.addressLine2,
+          city: city,
+          state: state,
+          postalCode: current.postalCode,
+          isDefault: current.isDefault,
+        );
+      }
+
+      _locationInfoText =
+          '$locationLabel (${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)})';
+
+      _refreshShippingForSelectedAddress();
+
+      showSnackBar(
+        context: context,
+        message: 'Location detected and shipping updated.',
+        isSuccess: true,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showSnackBar(
+        context: context,
+        message: 'Unable to fetch location: $e',
+        isSuccess: false,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingLocation = false;
+        });
+      }
+    }
+  }
+
+  Future<String> _buildLocationLabel({
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final response = await Dio().get(
+        'https://nominatim.openstreetmap.org/reverse',
+        queryParameters: {
+          'lat': latitude,
+          'lon': longitude,
+          'format': 'jsonv2',
+        },
+        options: Options(
+          headers: {'User-Agent': 'Agrix/1.0 (shipping-estimation)'},
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final address = data['address'] as Map<String, dynamic>?;
+      final city =
+          address?['city'] ??
+          address?['town'] ??
+          address?['village'] ??
+          address?['municipality'];
+      final state = address?['state'];
+
+      if (city != null && state != null) {
+        return '$city, $state';
+      }
+      if (city != null) {
+        return '$city';
+      }
+    } catch (_) {
+      // Fall back to coordinate-based label if reverse geocoding fails.
+    }
+
+    return 'Detected GPS location';
+  }
+
+  void _refreshShippingForSelectedAddress() {
+    if (_addresses.isEmpty) return;
+
+    final selectedAddress = _addresses[_selectedAddressIndex];
+    setState(() {
+      _shippingFee = _calculateShippingFee(selectedAddress);
+    });
+  }
+
+  double _calculateShippingFee(AddressEntity address) {
+    final city = address.city.toLowerCase();
+    if (city.contains('kathmandu') || city.contains('lalitpur')) {
+      return 60;
+    }
+    if (city.contains('bhaktapur') || city.contains('pokhara')) {
+      return 100;
+    }
+
+    if (_detectedLatitude != null && _detectedLongitude != null) {
+      final distanceKm = _distanceKm(
+        _detectedLatitude!,
+        _detectedLongitude!,
+        27.7172,
+        85.3240,
+      );
+      final computed = 60 + (distanceKm * 3.5);
+      return computed.clamp(60, 300).toDouble();
+    }
+
+    return 120;
+  }
+
+  double _distanceKm(double lat1, double lon1, double lat2, double lon2) {
+    const earthRadiusKm = 6371.0;
+    final dLat = _degToRad(lat2 - lat1);
+    final dLon = _degToRad(lon2 - lon1);
+
+    final a =
+        math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_degToRad(lat1)) *
+            math.cos(_degToRad(lat2)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  }
+
+  double _degToRad(double degree) {
+    return degree * (math.pi / 180);
   }
 
   Future<Map<String, dynamic>?> _createOrder(String token) async {
@@ -207,6 +391,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'postalCode': _addresses[_selectedAddressIndex].postalCode,
         },
         'paymentMethod': _paymentMethod == PaymentMethod.cod ? 'cod' : 'khalti',
+        'shippingFee': _shippingFee,
+        if (_detectedLatitude != null && _detectedLongitude != null)
+          'location': {
+            'latitude': _detectedLatitude,
+            'longitude': _detectedLongitude,
+          },
         // 'notes': _notesController.text, // Optional - add if you have a notes field
       };
 
@@ -401,7 +591,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     final subtotal = _calculateSubtotal(cart);
     final tax = _calculateTax(subtotal);
-    final total = _calculateTotal(subtotal, tax);
+    final total = _calculateTotal(subtotal, tax, _shippingFee);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundGrey,
@@ -525,6 +715,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'Please review your order and complete payment',
           style: AppStyles.bodyMedium.copyWith(color: AppColors.textGrey),
         ),
+        if (_locationInfoText != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Location: $_locationInfoText',
+            style: AppStyles.caption.copyWith(color: AppColors.secondaryGreen),
+          ),
+        ],
       ],
     );
   }
@@ -628,8 +825,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         return AddressStepWidget(
           addresses: _addresses,
           selectedAddressIndex: _selectedAddressIndex,
-          onAddressSelected:
-              (index) => setState(() => _selectedAddressIndex = index),
+          onAddressSelected: (index) {
+            setState(() => _selectedAddressIndex = index);
+            _refreshShippingForSelectedAddress();
+          },
           onContinue: () => setState(() => _currentStep = CheckoutStep.payment),
           showNewAddressForm: _showNewAddressForm,
           onAddNewAddress: () => setState(() => _showNewAddressForm = true),
@@ -643,6 +842,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           stateController: _stateController,
           postalCodeController: _postalCodeController,
           onSaveAddress: _addNewAddress,
+          onUseCurrentLocation: _useCurrentLocationForShipping,
+          isFetchingLocation: _isFetchingLocation,
+          locationInfoText: _locationInfoText,
         );
       case CheckoutStep.payment:
         return PaymentStepWidget(
@@ -720,9 +922,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 12),
           _summaryRow(
             'Shipping Fee',
-            'Free',
+            _formatCurrency(_shippingFee),
             isLight: true,
-            valueColor: Colors.green[700],
+            valueColor: AppColors.textBlack,
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
