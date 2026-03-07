@@ -20,6 +20,9 @@ class AddressStepWidget extends StatefulWidget {
   final TextEditingController stateController;
   final TextEditingController postalCodeController;
   final VoidCallback onSaveAddress;
+  final VoidCallback? onUseCurrentLocation;
+  final bool isFetchingLocation;
+  final String? locationInfoText;
 
   const AddressStepWidget({
     super.key,
@@ -39,6 +42,9 @@ class AddressStepWidget extends StatefulWidget {
     required this.stateController,
     required this.postalCodeController,
     required this.onSaveAddress,
+    this.onUseCurrentLocation,
+    this.isFetchingLocation = false,
+    this.locationInfoText,
   });
 
   @override
@@ -52,6 +58,8 @@ class _AddressStepWidgetState extends State<AddressStepWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Select Delivery Address'),
+        const SizedBox(height: 10),
+        _buildLocationAction(),
         const SizedBox(height: 16),
         _buildAddressList(),
         const SizedBox(height: 12),
@@ -59,6 +67,50 @@ class _AddressStepWidgetState extends State<AddressStepWidget> {
         if (widget.showNewAddressForm) _buildNewAddressForm(),
         const SizedBox(height: 32),
         _buildActionButtons(),
+      ],
+    );
+  }
+
+  Widget _buildLocationAction() {
+    if (widget.onUseCurrentLocation == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed:
+                widget.isFetchingLocation ? null : widget.onUseCurrentLocation,
+            icon:
+                widget.isFetchingLocation
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Icon(Icons.my_location, size: 18),
+            label: Text(
+              widget.isFetchingLocation
+                  ? 'Detecting location...'
+                  : 'Use Current Location',
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.primaryGreen),
+              foregroundColor: AppColors.primaryGreen,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+        if (widget.locationInfoText != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            widget.locationInfoText!,
+            style: AppStyles.caption.copyWith(color: AppColors.textGrey),
+          ),
+        ],
       ],
     );
   }
