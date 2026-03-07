@@ -182,6 +182,8 @@ class _CategoriesGridState extends ConsumerState<CategoriesGrid> {
       return 'assets/icons/sheep.png';
     } else if (name.contains('machinery') || name.contains('equipment')) {
       return 'assets/icons/tractor.png';
+    } else if (name.contains('sensor') || name.contains('smart')) {
+      return 'assets/icons/water-system.png';
     }
 
     return 'assets/icons/seeds.png';
