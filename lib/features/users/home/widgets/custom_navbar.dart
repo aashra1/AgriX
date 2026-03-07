@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 class CustomBottomNavBar extends StatefulWidget {
   final List<Widget> pages;
@@ -12,11 +16,50 @@ class CustomBottomNavBar extends StatefulWidget {
 
 class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   int _selectedIndex = 0;
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
+  DateTime _lastShakeTime = DateTime.fromMillisecondsSinceEpoch(0);
+
+  static const double _shakeThreshold = 15.0;
+  static const Duration _shakeCooldown = Duration(milliseconds: 1200);
+
+  @override
+  void initState() {
+    super.initState();
+    _startShakeDetection();
+  }
+
+  void _startShakeDetection() {
+    _accelerometerSubscription = accelerometerEventStream().listen((event) {
+      final accelerationMagnitude = sqrt(
+        event.x * event.x + event.y * event.y + event.z * event.z,
+      );
+      final now = DateTime.now();
+      final isInCooldown = now.difference(_lastShakeTime) < _shakeCooldown;
+
+      if (isInCooldown || accelerationMagnitude < _shakeThreshold) {
+        return;
+      }
+
+      _lastShakeTime = now;
+      if (!mounted) return;
+
+      // Index 3 is the Profile tab in this app's bottom navigation.
+      setState(() {
+        _selectedIndex = 3;
+      });
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void dispose() {
+    _accelerometerSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -48,7 +91,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),
