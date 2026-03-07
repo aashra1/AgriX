@@ -140,7 +140,9 @@ class _BusinessLoginScreenState extends ConsumerState<BusinessLoginScreen> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFFE9E9E9).withOpacity(0.45),
+                      fillColor: const Color(
+                        0xFFE9E9E9,
+                      ).withValues(alpha: 0.45),
                       labelText: 'Business Email',
                       labelStyle: GoogleFonts.crimsonPro(
                         fontSize: w * 0.05,
@@ -180,7 +182,9 @@ class _BusinessLoginScreenState extends ConsumerState<BusinessLoginScreen> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFFE9E9E9).withOpacity(0.45),
+                      fillColor: const Color(
+                        0xFFE9E9E9,
+                      ).withValues(alpha: 0.45),
                       labelText: 'Password',
                       labelStyle: GoogleFonts.crimsonPro(
                         fontSize: w * 0.055,
