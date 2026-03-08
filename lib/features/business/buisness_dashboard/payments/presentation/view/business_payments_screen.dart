@@ -6,6 +6,7 @@ import 'package:agrix/features/business/buisness_dashboard/payments/domain/entit
 import 'package:agrix/features/business/buisness_dashboard/payments/presentation/state/business_transaction_state.dart';
 import 'package:agrix/features/business/buisness_dashboard/payments/presentation/viewmodel/business_wallet_viewmodel.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_side_drawer.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -129,7 +130,10 @@ class _BusinessPaymentsScreenState
     if (shouldLogout == true) {
       await ref.read(userSessionServiceProvider).clearSession();
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/business/login');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginSelectionScreen()),
+          (route) => false,
+        );
       }
     }
   }
