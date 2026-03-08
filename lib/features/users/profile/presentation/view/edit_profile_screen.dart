@@ -165,6 +165,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       _phoneController.text = profile.phoneNumber;
       _addressController.text = profile.address ?? '';
       _profileImageUrl = _getProfileImageUrl(profile.profilePicture);
+      _imageError = false;
       setState(() => _isLoading = false);
     }
 
@@ -209,12 +210,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       backgroundImage:
                           _selectedImage != null
                               ? FileImage(_selectedImage!)
-                              : (_profileImageUrl != null && !_imageError
+                              : (_profileImageUrl != null &&
+                                      _profileImageUrl!.isNotEmpty &&
+                                      !_imageError
                                   ? NetworkImage(_profileImageUrl!)
                                   : null),
+                      onBackgroundImageError:
+                          (_, __) => setState(() => _imageError = true),
                       child:
                           (_selectedImage == null &&
-                                  (_profileImageUrl == null || _imageError))
+                                  (_profileImageUrl == null ||
+                                      _profileImageUrl!.isEmpty ||
+                                      _imageError))
                               ? const Icon(
                                 Icons.person,
                                 size: 55,
