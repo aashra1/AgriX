@@ -67,7 +67,7 @@ class _HeaderSectionState extends ConsumerState<HeaderSection> {
           profile.profilePicture!.isNotEmpty) {
         final fileName = profile.profilePicture!.split('/').last;
         _profileImageUrl =
-            "${ApiEndpoints.baseIp}/uploads/profile-images/$fileName";
+            "${ApiEndpoints.baseIp}/uploads/profiles/$fileName";
       }
       _isLoading = false;
     });
