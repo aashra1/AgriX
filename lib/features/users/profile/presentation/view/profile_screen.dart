@@ -3,11 +3,11 @@ import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/core/utils/snackbar_utils.dart';
-import 'package:agrix/features/users/auth/presentation/pages/login_page.dart';
 import 'package:agrix/features/users/profile/presentation/state/profile_state.dart';
 import 'package:agrix/features/users/profile/presentation/view/edit_profile_screen.dart';
 import 'package:agrix/features/users/profile/presentation/view/widgets/change_password_dialog.dart';
 import 'package:agrix/features/users/profile/presentation/viewmodel/profile_viewmodel.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,7 +75,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(
+            builder: (context) => const LoginSelectionScreen(),
+          ),
           (route) => false,
         );
       }
@@ -126,7 +128,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(
+            builder: (context) => const LoginSelectionScreen(),
+          ),
           (route) => false,
         );
       }
@@ -141,8 +145,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-    final profileState = ref.watch(userProfileViewModelProvider);
-
     ref.listen<UserProfileState>(userProfileViewModelProvider, (
       previous,
       next,
@@ -159,6 +161,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         setState(() {
           _fullName = next.profile!.fullName;
           _profileImageUrl = _getProfileImageUrl(next.profile!.profilePicture);
+          _imageError = false;
           _isLoading = false;
         });
       }
@@ -202,10 +205,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                           0.05,
                         ),
                         backgroundImage:
-                            _profileImageUrl != null && !_imageError
+                            _profileImageUrl != null &&
+                                    _profileImageUrl!.isNotEmpty &&
+                                    !_imageError
                                 ? NetworkImage(_profileImageUrl!)
                                 : const AssetImage(
-                                      'assets/icons/user_avatar.png',
+                                      'assets/images/profile.jpg',
                                     )
                                     as ImageProvider,
                         onBackgroundImageError:
