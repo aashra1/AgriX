@@ -4,5 +4,8 @@ import 'package:dartz/dartz.dart';
 
 abstract class IAuthRepository {
   Future<Either<Failure, AuthEntity>> loginUser(String email, String password);
-  Future<Either<Failure, bool>> registerUser(AuthEntity entity);
+  Future<Either<Failure, bool>> registerUser(
+    AuthEntity entity, {
+    String? imagePath,
+  });
 }
