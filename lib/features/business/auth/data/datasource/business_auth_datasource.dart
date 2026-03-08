@@ -12,7 +12,10 @@ abstract class IBusinessAuthLocalDatasource {
 }
 
 abstract interface class IBusinessAuthRemoteDatasource {
-  Future<Map<String, dynamic>> registerBusiness(BusinessAuthApiModel model);
+  Future<Map<String, dynamic>> registerBusiness(
+    BusinessAuthApiModel model, {
+    String? imagePath,
+  });
   Future<BusinessAuthApiModel?> loginBusiness(String email, String password);
 
   Future<BusinessAuthApiModel> uploadBusinessDocument({
