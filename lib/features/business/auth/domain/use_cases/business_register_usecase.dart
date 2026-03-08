@@ -14,6 +14,7 @@ class BusinessRegisterUsecaseParams extends Equatable {
   final String password;
   final String phoneNumber;
   final String? address;
+  final String? imagePath;
 
   const BusinessRegisterUsecaseParams({
     required this.businessName,
@@ -21,6 +22,7 @@ class BusinessRegisterUsecaseParams extends Equatable {
     required this.password,
     required this.phoneNumber,
     this.address,
+    this.imagePath,
   });
 
   @override
@@ -30,6 +32,7 @@ class BusinessRegisterUsecaseParams extends Equatable {
     password,
     phoneNumber,
     address,
+    imagePath,
   ];
 }
 
@@ -60,6 +63,9 @@ class BusinessRegisterUsecase
       address: params.address,
     );
 
-    return _authRepository.registerBusiness(businessEntity);
+    return _authRepository.registerBusiness(
+      businessEntity,
+      imagePath: params.imagePath,
+    );
   }
 }
