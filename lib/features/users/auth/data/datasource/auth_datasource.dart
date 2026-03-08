@@ -7,6 +7,6 @@ abstract class IAuthLocalDatasource {
 }
 
 abstract interface class IAuthRemoteDatasource {
-  Future<AuthApiModel> registerUser(AuthApiModel model);
+  Future<AuthApiModel> registerUser(AuthApiModel model, {String? imagePath});
   Future<AuthApiModel?> loginUser(String email, String password);
 }
