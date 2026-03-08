@@ -73,11 +73,17 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> registerUser(AuthEntity entity) async {
+  Future<Either<Failure, bool>> registerUser(
+    AuthEntity entity, {
+    String? imagePath,
+  }) async {
     if (await _networkInfo.isConnected) {
       try {
         final apimodel = AuthApiModel.fromAuthEntity(entity);
-        await _authRemoteDatasource.registerUser(apimodel);
+        await _authRemoteDatasource.registerUser(
+          apimodel,
+          imagePath: imagePath,
+        );
         return const Right(true);
       } on DioException catch (e) {
         return Left(
