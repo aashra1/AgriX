@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:agrix/core/utils/snackbar_utils.dart';
 import 'package:agrix/features/users/auth/presentation/pages/login_page.dart';
 import 'package:agrix/features/users/auth/presentation/state/auth_state.dart';
 import 'package:agrix/features/users/auth/presentation/viewmodel/auth_viewmodel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,22 +23,45 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _addressController = TextEditingController();
+  String? _selectedProfilePicturePath;
 
   bool _hiddenPassword = true;
 
   /// Handle Signup
   Future<void> _handleSignup() async {
-    if (_formKey.currentState!.validate()) {
-      ref
-          .read(authViewModelProvider.notifier)
-          .register(
-            fullName: _fullNameController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-            phoneNumber: _phoneNumberController.text.trim(),
-            address: _addressController.text.trim(),
-          );
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    if (_selectedProfilePicturePath == null ||
+        _selectedProfilePicturePath!.isEmpty) {
+      showSnackBar(
+        context: context,
+        message: 'Please select a profile picture',
+        isSuccess: false,
+      );
+      return;
+    }
+
+    ref
+        .read(authViewModelProvider.notifier)
+        .register(
+          fullName: _fullNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          phoneNumber: _phoneNumberController.text.trim(),
+          address: _addressController.text.trim(),
+          imagePath: _selectedProfilePicturePath,
+        );
+  }
+
+  Future<void> _pickProfilePicture() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result == null || result.files.single.path == null) return;
+
+    setState(() {
+      _selectedProfilePicturePath = result.files.single.path!;
+    });
   }
 
   @override
@@ -123,6 +149,42 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ),
 
                   SizedBox(height: h * 0.04),
+
+                  /// PROFILE PICTURE PICKER
+                  GestureDetector(
+                    onTap: _pickProfilePicture,
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: w * 0.13,
+                          backgroundColor: const Color(0xFFE9E9E9),
+                          backgroundImage:
+                              _selectedProfilePicturePath != null
+                                  ? FileImage(File(_selectedProfilePicturePath!))
+                                  : null,
+                          child:
+                              _selectedProfilePicturePath == null
+                                  ? Icon(
+                                    Icons.person,
+                                    size: w * 0.13,
+                                    color: const Color(0xFF777777),
+                                  )
+                                  : null,
+                        ),
+                        CircleAvatar(
+                          radius: w * 0.045,
+                          backgroundColor: const Color(0xFF0B3D0B),
+                          child: Icon(
+                            Icons.add_a_photo,
+                            size: w * 0.05,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: h * 0.02),
 
                   /// FORM FIELDS
                   _buildTextFormField(
@@ -275,7 +337,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       validator: validator,
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFFE9E9E9).withOpacity(0.45),
+        fillColor: const Color(0xFFE9E9E9).withValues(alpha: 0.45),
         labelText: label,
         labelStyle: GoogleFonts.crimsonPro(
           fontSize: w * 0.045,
