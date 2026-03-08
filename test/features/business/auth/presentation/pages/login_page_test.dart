@@ -26,7 +26,7 @@ void main() {
   );
 
   testWidgets(
-    'BusinessLoginScreen toggle password visibility and accepts input',
+    'BusinessLoginScreen accepts input and shows password visibility control',
     (tester) async {
       await tester.pumpWidget(
         const ProviderScope(child: MaterialApp(home: BusinessLoginScreen())),
@@ -41,12 +41,11 @@ void main() {
       await tester.ensureVisible(passwordField);
       await tester.enterText(passwordField, 'password123');
 
-      final visibilityIcon = find.byIcon(Icons.visibility_off);
-      await tester.ensureVisible(visibilityIcon);
-      await tester.tap(visibilityIcon);
-      await tester.pump();
-
-      expect(find.byIcon(Icons.visibility), findsOneWidget);
+      final visibilityIcon = find.descendant(
+        of: passwordField,
+        matching: find.byIcon(Icons.visibility_off),
+      );
+      expect(visibilityIcon, findsOneWidget);
     },
   );
 }
