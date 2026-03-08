@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:agrix/core/api/api_client.dart';
 import 'package:agrix/core/api/api_endpoints.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
 import 'package:agrix/features/users/auth/data/datasource/auth_datasource.dart';
 import 'package:agrix/features/users/auth/data/models/auth_api_model.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // User Remote Datasource Provider
@@ -53,10 +56,22 @@ class AuthRemoteDatasource implements IAuthRemoteDatasource {
   }
 
   @override
-  Future<AuthApiModel> registerUser(AuthApiModel model) async {
+  Future<AuthApiModel> registerUser(
+    AuthApiModel model, {
+    String? imagePath,
+  }) async {
+    dynamic data = model.toJson();
+    if (imagePath != null && imagePath.isNotEmpty && File(imagePath).existsSync()) {
+      final imageFile = await MultipartFile.fromFile(
+        imagePath,
+        filename: imagePath.split('/').last,
+      );
+      data = FormData.fromMap({...model.toJson(), 'profilePicture': imageFile});
+    }
+
     final response = await _apiClient.post(
       ApiEndpoints.userRegister,
-      data: model.toJson(),
+      data: data,
     );
 
     if (response.data['success'] == true) {
