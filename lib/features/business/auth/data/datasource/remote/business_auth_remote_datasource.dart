@@ -61,10 +61,25 @@ class BusinessAuthRemoteDatasource implements IBusinessAuthRemoteDatasource {
   @override
   Future<Map<String, dynamic>> registerBusiness(
     BusinessAuthApiModel model,
+    {String? imagePath}
   ) async {
+    dynamic data = model.toJson();
+    if (imagePath != null &&
+        imagePath.isNotEmpty &&
+        File(imagePath).existsSync()) {
+      final imageFile = await MultipartFile.fromFile(
+        imagePath,
+        filename: imagePath.split('/').last,
+      );
+      data = FormData.fromMap({
+        ...model.toJson(),
+        'profilePicture': imageFile,
+      });
+    }
+
     final response = await _apiClient.post(
       ApiEndpoints.businessRegister,
-      data: model.toJson(),
+      data: data,
     );
 
     if (response.data['success'] == true) {
