@@ -80,12 +80,17 @@ class BusinessAuthRepository implements IBusinessAuthRepository {
 
   @override
   Future<Either<Failure, Map<String, dynamic>>> registerBusiness(
-    BusinessAuthEntity entity,
+    BusinessAuthEntity entity, {
+    String? imagePath,
+  }
   ) async {
     if (await _networkInfo.isConnected) {
       try {
         final apiModel = BusinessAuthApiModel.fromBusinessAuthEntity(entity);
-        final result = await _authRemoteDatasource.registerBusiness(apiModel);
+        final result = await _authRemoteDatasource.registerBusiness(
+          apiModel,
+          imagePath: imagePath,
+        );
         return Right(result);
       } on DioException catch (e) {
         return Left(
@@ -155,4 +160,3 @@ class BusinessAuthRepository implements IBusinessAuthRepository {
     }
   }
 }
-
