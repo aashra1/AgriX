@@ -8,6 +8,7 @@ import 'package:agrix/features/business/buisness_dashboard/orders/domain/entity/
 import 'package:agrix/features/business/buisness_dashboard/orders/presentation/state/business_order_state.dart';
 import 'package:agrix/features/business/buisness_dashboard/orders/presentation/viewmodel/business_order_viewmodel.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_side_drawer.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -75,13 +76,14 @@ class _BusinessCustomersScreenState
 
     try {
       await ref
-          .read(businessOrderViewModelProvider.notifier)
-          .getBusinessOrders(
-            token: token,
-            businessId: businessId,
-            page: 1,
-            limit: 100,
-          );
+        .read(businessOrderViewModelProvider.notifier)
+        .getBusinessOrders(
+          token: token,
+          businessId: businessId,
+          page: 1,
+          limit: 100,
+          refresh: true,
+        );
     } catch (e) {
       setState(() => _isLoading = false);
       showSnackBar(
@@ -293,7 +295,10 @@ class _BusinessCustomersScreenState
     if (shouldLogout == true) {
       await ref.read(userSessionServiceProvider).clearSession();
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/business/login');
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginSelectionScreen()),
+          (route) => false,
+        );
       }
     }
   }
