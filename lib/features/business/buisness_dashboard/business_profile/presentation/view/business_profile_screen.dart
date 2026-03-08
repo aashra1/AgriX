@@ -9,6 +9,7 @@ import 'package:agrix/features/business/buisness_dashboard/business_profile/doma
 import 'package:agrix/features/business/buisness_dashboard/business_profile/presentation/state/business_profile_state.dart';
 import 'package:agrix/features/business/buisness_dashboard/business_profile/presentation/viewmodel/business_profile_viewmodel.dart';
 import 'package:agrix/features/business/buisness_dashboard/widgets/business_side_drawer.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -124,7 +125,10 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
     setState(() => _isLoggingOut = true);
     await ref.read(userSessionServiceProvider).clearSession();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/business/login');
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginSelectionScreen()),
+        (route) => false,
+      );
     }
   }
 
@@ -143,7 +147,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
     if (_selectedImage != null) return '';
     if (imagePath == null || imagePath.isEmpty) return '';
     final fileName = imagePath.split('/').last;
-    return '${ApiEndpoints.baseIp}/uploads/profile-images/$fileName';
+    return '${ApiEndpoints.baseIp}/uploads/business-profiles/$fileName';
   }
 
   String _formatDate(DateTime? date) {
