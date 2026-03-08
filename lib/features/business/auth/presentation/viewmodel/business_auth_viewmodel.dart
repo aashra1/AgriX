@@ -29,6 +29,7 @@ class BusinessAuthViewModel extends Notifier<BusinessAuthState> {
     required String password,
     required String phoneNumber,
     String? address,
+    String? imagePath,
   }) async {
     state = state.copyWith(status: BusinessAuthStatus.loading);
 
@@ -38,6 +39,7 @@ class BusinessAuthViewModel extends Notifier<BusinessAuthState> {
       password: password,
       phoneNumber: phoneNumber,
       address: address,
+      imagePath: imagePath,
     );
 
     final result = await _registerUsecase.call(registerParams);
