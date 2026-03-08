@@ -9,7 +9,9 @@ abstract class IBusinessAuthRepository {
   );
 
   Future<Either<Failure, Map<String, dynamic>>> registerBusiness(
-    BusinessAuthEntity entity,
+    BusinessAuthEntity entity, {
+    String? imagePath,
+  }
   );
 
   Future<Either<Failure, BusinessAuthEntity>> uploadBusinessDocument({
