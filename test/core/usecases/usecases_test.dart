@@ -221,12 +221,16 @@ void main() {
         address: 'Kathmandu',
       );
 
-      when(() => authRepository.registerUser(any())).thenAnswer((_) async => const Right(true));
+      when(
+        () => authRepository.registerUser(any(), imagePath: any(named: 'imagePath')),
+      ).thenAnswer((_) async => const Right(true));
 
       final result = await usecase(params);
 
       expect(result, const Right(true));
-      final captured = verify(() => authRepository.registerUser(captureAny())).captured.single as AuthEntity;
+      final captured = verify(
+        () => authRepository.registerUser(captureAny(), imagePath: any(named: 'imagePath')),
+      ).captured.first as AuthEntity;
       expect(captured.fullName, params.fullName);
       expect(captured.email, params.email);
       expect(captured.password, params.password);
@@ -470,7 +474,12 @@ void main() {
         address: 'Kathmandu',
       );
 
-      when(() => businessAuthRepository.registerBusiness(any()))
+      when(
+        () => businessAuthRepository.registerBusiness(
+          any(),
+          imagePath: any(named: 'imagePath'),
+        ),
+      )
           .thenAnswer((_) async => const Right({'ok': true}));
 
       final result = await usecase(params);
@@ -478,7 +487,12 @@ void main() {
       expect(result.isRight(), true);
       final map = result.getOrElse(() => <String, dynamic>{});
       expect(map['ok'], true);
-      final captured = verify(() => businessAuthRepository.registerBusiness(captureAny()))
+      final captured = verify(
+            () => businessAuthRepository.registerBusiness(
+              captureAny(),
+              imagePath: any(named: 'imagePath'),
+            ),
+          )
           .captured
           .single as BusinessAuthEntity;
       expect(captured.businessName, params.businessName);
