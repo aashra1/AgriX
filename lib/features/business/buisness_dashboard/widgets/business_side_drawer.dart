@@ -1,8 +1,8 @@
 import 'package:agrix/app/theme/app_colors.dart';
 import 'package:agrix/app/theme/app_styles.dart';
 import 'package:agrix/core/services/storage/user_session_service.dart';
-import 'package:agrix/features/business/auth/presentation/pages/login_page.dart';
 import 'package:agrix/features/business/buisness_dashboard/business_profile/presentation/viewmodel/business_profile_viewmodel.dart';
+import 'package:agrix/screens/choices/login_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -117,7 +117,9 @@ class _BusinessSidebarState extends ConsumerState<BusinessSidebar> {
       if (mounted) {
         Navigator.pop(context);
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const BusinessLoginScreen()),
+          MaterialPageRoute(
+            builder: (context) => const LoginSelectionScreen(),
+          ),
           (route) => false,
         );
       }
